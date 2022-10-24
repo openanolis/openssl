@@ -145,8 +145,17 @@ EVP_PKEY *X509_PUBKEY_get0(X509_PUBKEY *key)
     if (key == NULL || key->public_key == NULL)
         return NULL;
 
-    if (key->pkey != NULL)
+    if (key->pkey != NULL) {
+#ifndef OPENSSL_NO_SM2
+        if (EVP_PKEY_id(key->pkey) == EVP_PKEY_EC) {
+            EC_KEY *ec = EVP_PKEY_get0_EC_KEY(key->pkey);
+            int curve = EC_GROUP_get_curve_name(EC_KEY_get0_group(ec));
+            if (curve == NID_sm2)
+                EVP_PKEY_set_alias_type(key->pkey, EVP_PKEY_SM2);
+        }
+#endif
         return key->pkey;
+    }
 
     /*
      * When the key ASN.1 is initially parsed an attempt is made to

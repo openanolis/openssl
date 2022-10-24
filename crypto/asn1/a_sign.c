@@ -145,6 +145,7 @@ int ASN1_item_sign_ctx(const ASN1_ITEM *it,
     unsigned char *buf_in = NULL, *buf_out = NULL;
     size_t inl = 0, outl = 0, outll = 0;
     int signid, paramtype, buf_len = 0;
+    int pkey_id;
     int rv;
 
     type = EVP_MD_CTX_md(ctx);
@@ -184,9 +185,16 @@ int ASN1_item_sign_ctx(const ASN1_ITEM *it,
             ASN1err(ASN1_F_ASN1_ITEM_SIGN_CTX, ASN1_R_CONTEXT_NOT_INITIALISED);
             goto err;
         }
+
+        pkey_id = pkey->ameth->pkey_id;
+#ifndef OPENSSL_NO_SM2
+        if (pkey_id == EVP_PKEY_EC && EVP_PKEY_id(pkey) == EVP_PKEY_SM2)
+            pkey_id = EVP_PKEY_SM2;
+#endif
+
         if (!OBJ_find_sigid_by_algs(&signid,
                                     EVP_MD_nid(type),
-                                    pkey->ameth->pkey_id)) {
+                                    pkey_id)) {
             ASN1err(ASN1_F_ASN1_ITEM_SIGN_CTX,
                     ASN1_R_DIGEST_AND_KEY_TYPE_NOT_SUPPORTED);
             goto err;

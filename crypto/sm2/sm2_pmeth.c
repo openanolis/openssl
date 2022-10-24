@@ -252,6 +252,27 @@ static int pkey_sm2_ctrl_str(EVP_PKEY_CTX *ctx,
         else
             return -2;
         return EVP_PKEY_CTX_set_ec_param_enc(ctx, param_enc);
+    } else if (strcmp(type, "distid") == 0) {
+        SM2_PKEY_CTX *smctx = ctx->data;
+
+        OPENSSL_free(smctx->id);
+
+        if (value) {
+            long len;
+
+            smctx->id = OPENSSL_hexstr2buf(value, &len);
+            if (smctx->id == NULL) {
+                SM2err(SM2_F_PKEY_SM2_CTRL_STR, SM2_R_ID_NOT_SET);
+                return -2;
+            }
+            smctx->id_len = (size_t)len;
+        } else {
+            /* set null-ID */
+            smctx->id = NULL;
+            smctx->id_len = 0;
+        }
+        smctx->id_set = 1;
+        return 1;
     }
 
     return -2;

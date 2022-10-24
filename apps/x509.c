@@ -48,7 +48,7 @@ static int print_x509v3_exts(BIO *bio, X509 *x, const char *exts);
 typedef enum OPTION_choice {
     OPT_ERR = -1, OPT_EOF = 0, OPT_HELP,
     OPT_INFORM, OPT_OUTFORM, OPT_KEYFORM, OPT_REQ, OPT_CAFORM,
-    OPT_CAKEYFORM, OPT_SIGOPT, OPT_DAYS, OPT_PASSIN, OPT_EXTFILE,
+    OPT_CAKEYFORM, OPT_SIGOPT, OPT_VFYOPT, OPT_DAYS, OPT_PASSIN, OPT_EXTFILE,
     OPT_EXTENSIONS, OPT_IN, OPT_OUT, OPT_SIGNKEY, OPT_CA,
     OPT_CAKEY, OPT_CASERIAL, OPT_SET_SERIAL, OPT_FORCE_PUBKEY,
     OPT_ADDTRUST, OPT_ADDREJECT, OPT_SETALIAS, OPT_CERTOPT, OPT_NAMEOPT,
@@ -132,6 +132,7 @@ const OPTIONS x509_options[] = {
     {"CAform", OPT_CAFORM, 'F', "CA format - default PEM"},
     {"CAkeyform", OPT_CAKEYFORM, 'E', "CA key format - default PEM"},
     {"sigopt", OPT_SIGOPT, 's', "Signature parameter in n:v form"},
+    {"vfyopt", OPT_VFYOPT, 's', "CSR verification parameter in n:v form"},
     {"force_pubkey", OPT_FORCE_PUBKEY, '<', "Force the Key to put inside certificate"},
     {"next_serial", OPT_NEXT_SERIAL, '-', "Increment current certificate serial number"},
     {"clrreject", OPT_CLRREJECT, '-',
@@ -159,7 +160,7 @@ int x509_main(int argc, char **argv)
     CONF *extconf = NULL;
     EVP_PKEY *Upkey = NULL, *CApkey = NULL, *fkey = NULL;
     STACK_OF(ASN1_OBJECT) *trust = NULL, *reject = NULL;
-    STACK_OF(OPENSSL_STRING) *sigopts = NULL;
+    STACK_OF(OPENSSL_STRING) *sigopts = NULL, *vfyopts = NULL;
     X509 *x = NULL, *xca = NULL;
     X509_REQ *req = NULL, *rq = NULL;
     X509_STORE *ctx = NULL;
@@ -239,6 +240,12 @@ int x509_main(int argc, char **argv)
             if (!sigopts)
                 sigopts = sk_OPENSSL_STRING_new_null();
             if (!sigopts || !sk_OPENSSL_STRING_push(sigopts, opt_arg()))
+                goto opthelp;
+            break;
+        case OPT_VFYOPT:
+            if (!vfyopts)
+                vfyopts = sk_OPENSSL_STRING_new_null();
+            if (!vfyopts || !sk_OPENSSL_STRING_push(vfyopts, opt_arg()))
                 goto opthelp;
             break;
         case OPT_DAYS:
@@ -535,7 +542,7 @@ int x509_main(int argc, char **argv)
             BIO_printf(bio_err, "error unpacking public key\n");
             goto end;
         }
-        i = X509_REQ_verify(req, pkey);
+        i = do_X509_REQ_verify(req, pkey, vfyopts);
         if (i < 0) {
             BIO_printf(bio_err, "Signature verification error\n");
             ERR_print_errors(bio_err);
@@ -544,6 +551,7 @@ int x509_main(int argc, char **argv)
         if (i == 0) {
             BIO_printf(bio_err,
                        "Signature did not match the certificate request\n");
+            ERR_print_errors(bio_err);
             goto end;
         } else {
             BIO_printf(bio_err, "Signature ok\n");
@@ -898,6 +906,7 @@ int x509_main(int argc, char **argv)
     EVP_PKEY_free(CApkey);
     EVP_PKEY_free(fkey);
     sk_OPENSSL_STRING_free(sigopts);
+    sk_OPENSSL_STRING_free(vfyopts);
     X509_REQ_free(rq);
     ASN1_INTEGER_free(sno);
     sk_ASN1_OBJECT_pop_free(trust, ASN1_OBJECT_free);
