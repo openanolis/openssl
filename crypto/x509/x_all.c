@@ -27,10 +27,25 @@ int X509_verify(X509 *a, EVP_PKEY *r)
                              &a->signature, &a->cert_info, r));
 }
 
+int X509_verify_ctx(X509 *a, EVP_PKEY *r, EVP_MD_CTX *ctx)
+{
+    if (X509_ALGOR_cmp(&a->sig_alg, &a->cert_info.signature))
+        return 0;
+    return (ASN1_item_verify_ctx(ASN1_ITEM_rptr(X509_CINF), &a->sig_alg,
+                                 &a->signature, &a->cert_info, r, ctx));
+}
+
 int X509_REQ_verify(X509_REQ *a, EVP_PKEY *r)
 {
     return (ASN1_item_verify(ASN1_ITEM_rptr(X509_REQ_INFO),
                              &a->sig_alg, a->signature, &a->req_info, r));
+}
+
+int X509_REQ_verify_ctx(X509_REQ *a, EVP_PKEY *r, EVP_MD_CTX *ctx)
+{
+    return (ASN1_item_verify_ctx(ASN1_ITEM_rptr(X509_REQ_INFO),
+                                 &a->sig_alg, a->signature, &a->req_info, r,
+                                 ctx));
 }
 
 int NETSCAPE_SPKI_verify(NETSCAPE_SPKI *a, EVP_PKEY *r)

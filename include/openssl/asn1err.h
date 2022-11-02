@@ -60,6 +60,7 @@ int ERR_load_ASN1_strings(void);
 # define ASN1_F_ASN1_ITEM_SIGN_CTX                        220
 # define ASN1_F_ASN1_ITEM_UNPACK                          199
 # define ASN1_F_ASN1_ITEM_VERIFY                          197
+# define ASN1_F_ASN1_ITEM_VERIFY_CTX                      200
 # define ASN1_F_ASN1_MBSTRING_NCOPY                       122
 # define ASN1_F_ASN1_OBJECT_NEW                           123
 # define ASN1_F_ASN1_OUTPUT_DATA                          214

@@ -348,8 +348,10 @@ void *X509_CRL_get_meth_data(X509_CRL *crl);
 const char *X509_verify_cert_error_string(long n);
 
 int X509_verify(X509 *a, EVP_PKEY *r);
+int X509_verify_ctx(X509 *a, EVP_PKEY *r, EVP_MD_CTX *ctx);
 
 int X509_REQ_verify(X509_REQ *a, EVP_PKEY *r);
+int X509_REQ_verify_ctx(X509_REQ *a, EVP_PKEY *r, EVP_MD_CTX *ctx);
 int X509_CRL_verify(X509_CRL *a, EVP_PKEY *r);
 int NETSCAPE_SPKI_verify(NETSCAPE_SPKI *a, EVP_PKEY *r);
 
@@ -624,6 +626,9 @@ int ASN1_item_digest(const ASN1_ITEM *it, const EVP_MD *type, void *data,
 
 int ASN1_item_verify(const ASN1_ITEM *it, X509_ALGOR *algor1,
                      ASN1_BIT_STRING *signature, void *data, EVP_PKEY *pkey);
+int ASN1_item_verify_ctx(const ASN1_ITEM *it, X509_ALGOR *a,
+                         ASN1_BIT_STRING *signature, void *asn, EVP_PKEY *pkey,
+                         EVP_MD_CTX *ctx);
 
 int ASN1_item_sign(const ASN1_ITEM *it, X509_ALGOR *algor1,
                    X509_ALGOR *algor2, ASN1_BIT_STRING *signature, void *data,

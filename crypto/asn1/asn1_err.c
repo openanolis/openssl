@@ -60,6 +60,8 @@ static const ERR_STRING_DATA ASN1_str_functs[] = {
      "ASN1_item_sign_ctx"},
     {ERR_PACK(ERR_LIB_ASN1, ASN1_F_ASN1_ITEM_UNPACK, 0), "ASN1_item_unpack"},
     {ERR_PACK(ERR_LIB_ASN1, ASN1_F_ASN1_ITEM_VERIFY, 0), "ASN1_item_verify"},
+    {ERR_PACK(ERR_LIB_ASN1, ASN1_F_ASN1_ITEM_VERIFY_CTX, 0),
+     "ASN1_item_verify_ctx"},
     {ERR_PACK(ERR_LIB_ASN1, ASN1_F_ASN1_MBSTRING_NCOPY, 0),
      "ASN1_mbstring_ncopy"},
     {ERR_PACK(ERR_LIB_ASN1, ASN1_F_ASN1_OBJECT_NEW, 0), "ASN1_OBJECT_new"},
