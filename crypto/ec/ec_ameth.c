@@ -94,7 +94,7 @@ static int eckey_pub_encode(X509_PUBKEY *pk, const EVP_PKEY *pkey)
     penclen = i2o_ECPublicKey(ec_key, &p);
     if (penclen <= 0)
         goto err;
-    if (X509_PUBKEY_set0_param(pk, OBJ_nid2obj(EVP_PKEY_EC),
+    if (X509_PUBKEY_set0_param(pk, OBJ_nid2obj(EVP_PKEY_id(pkey)),
                                ptype, pval, penc, penclen))
         return 1;
  err:
