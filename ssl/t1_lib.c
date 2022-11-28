@@ -2105,6 +2105,36 @@ int tls1_set_sigalgs(CERT *c, const int *psig_nids, size_t salglen, int client)
     return 0;
 }
 
+static int tls1_sigalgs_have_sha1(const uint16_t *sigalgs, size_t sigalgslen)
+{
+    size_t i;
+
+    for (i = 0; i < sigalgslen; i++, sigalgs++) {
+        const SIGALG_LOOKUP *lu = tls1_lookup_sigalg(*sigalgs);
+
+        if (lu == NULL)
+            continue;
+        if (lu->hash == NID_sha1)
+            return 1;
+    }
+    return 0;
+}
+
+
+int tls1_cert_sigalgs_have_sha1(const CERT *c)
+{
+    if (c->client_sigalgs != NULL) {
+        if (tls1_sigalgs_have_sha1(c->client_sigalgs, c->client_sigalgslen))
+            return 1;
+    }
+    if (c->conf_sigalgs != NULL) {
+        if (tls1_sigalgs_have_sha1(c->conf_sigalgs, c->conf_sigalgslen))
+            return 1;
+        return 0;
+    }
+    return 1;
+}
+
 static int tls1_check_sig_alg(SSL *s, X509 *x, int default_nid)
 {
     int sig_nid, use_pc_sigalgs = 0;

@@ -81,8 +81,10 @@ using MD5 for the MAC is also prohibited.
 
 =item B<Level 2>
 
-Security level set to 112 bits of security. As a result RSA, DSA and DH keys
-shorter than 2048 bits and ECC keys shorter than 224 bits are prohibited.
+Security level set to 112 bits of security with the exception of SHA1 allowed
+for signatures.
+As a result RSA, DSA and DH keys shorter than 2048 bits and ECC keys
+shorter than 224 bits are prohibited.
 In addition to the level 1 exclusions any cipher suite using RC4 is also
 prohibited. SSL version 3 is also not allowed. Compression is disabled.
 

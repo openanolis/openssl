@@ -27,6 +27,7 @@
 static int ssl_security_default_callback(const SSL *s, const SSL_CTX *ctx,
                                          int op, int bits, int nid, void *other,
                                          void *ex);
+static unsigned long sha1_disable(const SSL *s, const SSL_CTX *ctx);
 
 static CRYPTO_ONCE ssl_x509_store_ctx_once = CRYPTO_ONCE_STATIC_INIT;
 static volatile int ssl_x509_store_ctx_idx = -1;
@@ -396,7 +397,7 @@ int ssl_verify_cert_chain(SSL *s, STACK_OF(X509) *sk)
     X509_VERIFY_PARAM_set_auth_level(param, SSL_get_security_level(s));
 
     /* Set suite B flags if needed */
-    X509_STORE_CTX_set_flags(ctx, tls1_suiteb(s));
+    X509_STORE_CTX_set_flags(ctx, tls1_suiteb(s) | sha1_disable(s, NULL));
     if (!X509_STORE_CTX_set_ex_data
         (ctx, SSL_get_ex_data_X509_STORE_CTX_idx(), s)) {
         goto end;
@@ -953,10 +954,31 @@ static int ssl_security_default_callback(const SSL *s, const SSL_CTX *ctx,
             return 0;
         break;
     default:
+        /* allow SHA1 in SECLEVEL 2 in non FIPS mode */
+        if (nid == NID_sha1 && minbits == 112 && !sha1_disable(s, ctx))
+            break;
         if (bits < minbits)
             return 0;
     }
     return 1;
+}
+
+static unsigned long sha1_disable(const SSL *s, const SSL_CTX *ctx)
+{
+    unsigned long ret = 0x40000000; /* a magical internal value used by X509_VERIFY_PARAM */
+    const CERT *c;
+
+    if (FIPS_mode())
+        return ret;
+
+    if (ctx != NULL) {
+       c = ctx->cert;
+    } else {
+       c = s->cert;
+    }
+    if (tls1_cert_sigalgs_have_sha1(c))
+        return 0;
+    return ret;
 }
 
 int ssl_security(const SSL *s, int op, int bits, int nid, void *other)
