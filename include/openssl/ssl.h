@@ -1858,11 +1858,11 @@ __owur const char *SSL_get_version(const SSL *s);
 /* This sets the 'default' SSL version that SSL_new() will create */
 __owur int SSL_CTX_set_ssl_version(SSL_CTX *ctx, const SSL_METHOD *meth);
 
-# ifndef OPENSSL_NO_SSL3_METHOD
+/* # ifndef OPENSSL_NO_SSL3_METHOD */
 DEPRECATEDIN_1_1_0(__owur const SSL_METHOD *SSLv3_method(void)) /* SSLv3 */
 DEPRECATEDIN_1_1_0(__owur const SSL_METHOD *SSLv3_server_method(void))
 DEPRECATEDIN_1_1_0(__owur const SSL_METHOD *SSLv3_client_method(void))
-# endif
+/* # endif */
 
 #define SSLv23_method           TLS_method
 #define SSLv23_server_method    TLS_server_method

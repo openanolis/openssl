@@ -275,4 +275,21 @@ const SSL_METHOD *DTLSv1_client_method(void)
 }
 # endif
 
+# ifdef OPENSSL_NO_SSL3_METHOD
+const SSL_METHOD *SSLv3_method(void)
+{
+    return NULL;
+}
+
+const SSL_METHOD *SSLv3_server_method(void)
+{
+    return NULL;
+}
+
+const SSL_METHOD *SSLv3_client_method(void)
+{
+    return NULL;
+}
+# endif
+
 #endif
