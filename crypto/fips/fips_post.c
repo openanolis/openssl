@@ -67,12 +67,18 @@
 
 # include <openssl/fips.h>
 # include "crypto/fips.h"
+# include "crypto/rand.h"
 # include "fips_locl.h"
 
 /* Run all selftests */
 int FIPS_selftest(void)
 {
     int rv = 1;
+    if (!rand_drbg_selftest()) {
+        FIPSerr(FIPS_F_FIPS_SELFTEST, FIPS_R_TEST_FAILURE);
+        ERR_add_error_data(2, "Type=", "rand_drbg_selftest");
+        rv = 0;
+    }
     if (!FIPS_selftest_drbg())
         rv = 0;
     if (!FIPS_selftest_sha1())

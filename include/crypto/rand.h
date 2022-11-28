@@ -140,4 +140,9 @@ void rand_pool_cleanup(void);
  */
 void rand_pool_keep_random_devices_open(int keep);
 
+/*
+ * Perform the DRBG KAT selftests
+ */
+int rand_drbg_selftest(void);
+
 #endif
