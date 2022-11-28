@@ -64,6 +64,11 @@ extern "C" {
 
     int FIPS_selftest(void);
     int FIPS_selftest_failed(void);
+
+    /*
+     * This function is deprecated as it performs selftest of the old FIPS drbg
+     * implementation that is not validated.
+     */
     int FIPS_selftest_drbg_all(void);
 
     int FIPS_dsa_builtin_paramgen2(DSA *ret, size_t L, size_t N,

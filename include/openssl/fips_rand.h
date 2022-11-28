@@ -60,6 +60,20 @@
 #  ifdef  __cplusplus
 extern "C" {
 #  endif
+
+/*
+ * IMPORTANT NOTE:
+ * All functions in this header file are deprecated and should not be used
+ * as they use the old FIPS_drbg implementation that is not FIPS validated
+ * anymore.
+ * To provide backwards compatibility for applications that need FIPS compliant
+ * RNG number generation and use FIPS_drbg_generate, this function was
+ * re-wired to call the FIPS validated DRBG instance instead through
+ * the RAND_bytes() call.
+ *
+ * All these functions will be removed in future.
+ */
+
     typedef struct drbg_ctx_st DRBG_CTX;
 /* DRBG external flags */
 /* Flag for CTR mode only: use derivation function ctr_df */

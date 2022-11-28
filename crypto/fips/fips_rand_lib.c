@@ -120,6 +120,7 @@ void FIPS_rand_reset(void)
 
 int FIPS_rand_seed(const void *buf, int num)
 {
+#if 0
     if (!fips_approved_rand_meth && FIPS_module_mode()) {
         FIPSerr(FIPS_F_FIPS_RAND_SEED, FIPS_R_NON_FIPS_METHOD);
         return 0;
@@ -127,10 +128,15 @@ int FIPS_rand_seed(const void *buf, int num)
     if (fips_rand_meth && fips_rand_meth->seed)
         fips_rand_meth->seed(buf, num);
     return 1;
+#else
+    RAND_seed(buf, num);
+    return 1;
+#endif
 }
 
 int FIPS_rand_bytes(unsigned char *buf, int num)
 {
+#if 0
     if (!fips_approved_rand_meth && FIPS_module_mode()) {
         FIPSerr(FIPS_F_FIPS_RAND_BYTES, FIPS_R_NON_FIPS_METHOD);
         return 0;
@@ -138,10 +144,14 @@ int FIPS_rand_bytes(unsigned char *buf, int num)
     if (fips_rand_meth && fips_rand_meth->bytes)
         return fips_rand_meth->bytes(buf, num);
     return 0;
+#else
+    return RAND_bytes(buf, num);
+#endif
 }
 
 int FIPS_rand_status(void)
 {
+#if 0
     if (!fips_approved_rand_meth && FIPS_module_mode()) {
         FIPSerr(FIPS_F_FIPS_RAND_STATUS, FIPS_R_NON_FIPS_METHOD);
         return 0;
@@ -149,6 +159,9 @@ int FIPS_rand_status(void)
     if (fips_rand_meth && fips_rand_meth->status)
         return fips_rand_meth->status();
     return 0;
+#else
+    return RAND_status();
+#endif
 }
 
 /* Return instantiated strength of PRNG. For DRBG this is an internal

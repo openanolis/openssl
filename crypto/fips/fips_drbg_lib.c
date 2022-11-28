@@ -337,6 +337,19 @@ static int drbg_reseed(DRBG_CTX *dctx,
 int FIPS_drbg_reseed(DRBG_CTX *dctx,
                      const unsigned char *adin, size_t adinlen)
 {
+    int len = (int)adinlen;
+
+    if (len < 0 || (size_t)len != adinlen) {
+        FIPSerr(FIPS_F_DRBG_RESEED, FIPS_R_ADDITIONAL_INPUT_TOO_LONG);
+        return 0;
+    }
+    RAND_seed(adin, len);
+    return 1;
+}
+
+int FIPS_drbg_reseed_internal(DRBG_CTX *dctx,
+                     const unsigned char *adin, size_t adinlen)
+{
     return drbg_reseed(dctx, adin, adinlen, 1);
 }
 
@@ -355,6 +368,19 @@ static int fips_drbg_check(DRBG_CTX *dctx)
 }
 
 int FIPS_drbg_generate(DRBG_CTX *dctx, unsigned char *out, size_t outlen,
+                       int prediction_resistance,
+                       const unsigned char *adin, size_t adinlen)
+{
+    int len = (int)outlen;
+
+    if (len < 0 || (size_t)len != outlen) {
+        FIPSerr(FIPS_F_FIPS_DRBG_GENERATE, FIPS_R_REQUEST_TOO_LARGE_FOR_DRBG);
+        return 0;
+    }
+    return RAND_bytes(out, len);
+}
+
+int FIPS_drbg_generate_internal(DRBG_CTX *dctx, unsigned char *out, size_t outlen,
                        int prediction_resistance,
                        const unsigned char *adin, size_t adinlen)
 {

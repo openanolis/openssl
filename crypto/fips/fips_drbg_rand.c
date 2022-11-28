@@ -57,6 +57,8 @@
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #include <openssl/fips.h>
+#define FIPS_DRBG_generate FIPS_DRBG_generate_internal
+#define FIPS_DRBG_reseed FIPS_DRBG_reseed_internal
 #include <openssl/fips_rand.h>
 #include "fips_rand_lcl.h"
 
