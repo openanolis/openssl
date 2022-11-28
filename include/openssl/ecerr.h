@@ -42,6 +42,11 @@ int ERR_load_EC_strings(void);
 #  define EC_F_ECDSA_SIGN_SETUP                            248
 #  define EC_F_ECDSA_SIG_NEW                               265
 #  define EC_F_ECDSA_VERIFY                                253
+#  define EC_F_ECDSA_SIMPLE_SIGN_SETUP                     310
+#  define EC_F_ECDSA_SIMPLE_SIGN_SIG                       311
+#  define EC_F_ECDSA_SIMPLE_VERIFY_SIG                     312
+#  define EC_F_ECDSA_S390X_NISTP_SIGN_SIG                  313
+#  define EC_F_ECDSA_S390X_NISTP_VERIFY_SIG                314
 #  define EC_F_ECD_ITEM_VERIFY                             270
 #  define EC_F_ECKEY_PARAM2TYPE                            223
 #  define EC_F_ECKEY_PARAM_DECODE                          212
@@ -185,6 +190,7 @@ int ERR_load_EC_strings(void);
 #  define EC_F_O2I_ECPUBLICKEY                             152
 #  define EC_F_OLD_EC_PRIV_DECODE                          222
 #  define EC_F_OSSL_ECDH_COMPUTE_KEY                       247
+#  define EC_F_OSSL_ECDSA_SIGN_SETUP                       300
 #  define EC_F_OSSL_ECDSA_SIGN_SIG                         249
 #  define EC_F_OSSL_ECDSA_VERIFY_SIG                       250
 #  define EC_F_PKEY_ECD_CTRL                               271
@@ -200,6 +206,12 @@ int ERR_load_EC_strings(void);
 #  define EC_F_PKEY_EC_KEYGEN                              199
 #  define EC_F_PKEY_EC_PARAMGEN                            219
 #  define EC_F_PKEY_EC_SIGN                                218
+#   define EC_F_S390X_PKEY_ECD_DIGESTSIGN25519             320
+#   define EC_F_S390X_PKEY_ECD_DIGESTSIGN448               321
+#   define EC_F_S390X_PKEY_ECD_KEYGEN25519                 322
+#   define EC_F_S390X_PKEY_ECD_KEYGEN448                   323
+#   define EC_F_S390X_PKEY_ECX_KEYGEN25519                 324
+#   define EC_F_S390X_PKEY_ECX_KEYGEN448                   325
 #  define EC_F_VALIDATE_ECX_DERIVE                         278
 
 /*
@@ -212,6 +224,7 @@ int ERR_load_EC_strings(void);
 #  define EC_R_CANNOT_INVERT                               165
 #  define EC_R_COORDINATES_OUT_OF_RANGE                    146
 #  define EC_R_CURVE_DOES_NOT_SUPPORT_ECDH                 160
+#  define EC_R_CURVE_DOES_NOT_SUPPORT_ECDSA                170
 #  define EC_R_CURVE_DOES_NOT_SUPPORT_SIGNING              159
 #  define EC_R_D2I_ECPKPARAMETERS_FAILURE                  117
 #  define EC_R_DECODE_ERROR                                142

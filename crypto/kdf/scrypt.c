@@ -504,4 +504,9 @@ static int scrypt_alg(const char *pass, size_t passlen,
     return rv;
 }
 
+const EVP_PKEY_METHOD *scrypt_pkey_method(void)
+{
+    return &scrypt_pkey_meth;
+}
+
 #endif

@@ -233,6 +233,11 @@ const EVP_KDF_METHOD hkdf_kdf_meth = {
     kdf_hkdf_derive
 };
 
+const EVP_PKEY_METHOD *hkdf_pkey_method(void)
+{
+    return &hkdf_pkey_meth;
+}
+
 static int HKDF(const EVP_MD *evp_md,
                 const unsigned char *salt, size_t salt_len,
                 const unsigned char *key, size_t key_len,
