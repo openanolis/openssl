@@ -4852,13 +4852,51 @@ int ssl_derive(SSL *s, EVP_PKEY *privkey, EVP_PKEY *pubkey, int gensecret)
 EVP_PKEY *ssl_dh_to_pkey(DH *dh)
 {
     EVP_PKEY *ret;
+    DH *dhp = NULL;
+
     if (dh == NULL)
         return NULL;
+
+    if (FIPS_mode() && DH_get_nid(dh) == NID_undef) {
+        int bits = DH_bits(dh);
+        BIGNUM *p, *g;
+
+        dhp = DH_new();
+        if (dhp == NULL)
+            return NULL;
+        g = BN_new();
+        if (g == NULL || !BN_set_word(g, 2)) {
+            DH_free(dhp);
+            BN_free(g);
+            return NULL;
+        }
+
+        if (bits >= 7000)
+            p = BN_get_rfc3526_prime_8192(NULL);
+        else if (bits >= 5000)
+            p = BN_get_rfc3526_prime_6144(NULL);
+        else if (bits >= 3800)
+            p = BN_get_rfc3526_prime_4096(NULL);
+        else if (bits >= 2500)
+            p = BN_get_rfc3526_prime_3072(NULL);
+        else
+            p = BN_get_rfc3526_prime_2048(NULL);
+        if (p == NULL || !DH_set0_pqg(dhp, p, NULL, g)) {
+            DH_free(dhp);
+            BN_free(p);
+            BN_free(g);
+            return NULL;
+        }
+        dh = dhp;
+    }
+
     ret = EVP_PKEY_new();
     if (EVP_PKEY_set1_DH(ret, dh) <= 0) {
+        DH_free(dhp);
         EVP_PKEY_free(ret);
         return NULL;
     }
+    DH_free(dhp);
     return ret;
 }
 #endif

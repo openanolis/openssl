@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "internal/cryptlib.h"
 #include <openssl/bn.h>
+#include <openssl/obj_mac.h>
 #include "dh_local.h"
 
 # define DH_NUMBER_ITERATIONS_FOR_PRIME 64
@@ -40,6 +41,12 @@ int DH_check_params(const DH *dh, int *ret)
     int ok = 0;
     BIGNUM *tmp = NULL;
     BN_CTX *ctx = NULL;
+
+    if (FIPS_mode()) {
+        int nid = dh->nid == NID_undef ? DH_get_nid(dh) : dh->nid;
+
+        return nid != NID_undef;
+    }
 
     *ret = 0;
     ctx = BN_CTX_new();
@@ -95,6 +102,7 @@ int DH_check_ex(const DH *dh)
     return errflags == 0;
 }
 
+/* Note: according to documentation - this only checks the params */
 int DH_check(const DH *dh, int *ret)
 {
     int ok = 0, r;
@@ -103,6 +111,9 @@ int DH_check(const DH *dh, int *ret)
 
     if (!DH_check_params(dh, ret))
         return 0;
+
+    if (FIPS_mode()) /* we allow only well-known params */
+        return 1;
 
     ctx = BN_CTX_new();
     if (ctx == NULL)
@@ -177,7 +188,7 @@ int DH_check_pub_key_ex(const DH *dh, const BIGNUM *pub_key)
     return errflags == 0;
 }
 
-int DH_check_pub_key(const DH *dh, const BIGNUM *pub_key, int *ret)
+static int dh_check_pub_key_int(const DH *dh, const BIGNUM *q, const BIGNUM *pub_key, int *ret)
 {
     int ok = 0;
     BIGNUM *tmp = NULL;
@@ -198,9 +209,9 @@ int DH_check_pub_key(const DH *dh, const BIGNUM *pub_key, int *ret)
     if (BN_cmp(pub_key, tmp) >= 0)
         *ret |= DH_CHECK_PUBKEY_TOO_LARGE;
 
-    if (dh->q != NULL) {
+    if (q != NULL) {
         /* Check pub_key^q == 1 mod p */
-        if (!BN_mod_exp(tmp, pub_key, dh->q, dh->p, ctx))
+        if (!BN_mod_exp(tmp, pub_key, q, dh->p, ctx))
             goto err;
         if (!BN_is_one(tmp))
             *ret |= DH_CHECK_PUBKEY_INVALID;
@@ -212,3 +223,23 @@ int DH_check_pub_key(const DH *dh, const BIGNUM *pub_key, int *ret)
     BN_CTX_free(ctx);
     return ok;
 }
+
+int DH_check_pub_key(const DH *dh, const BIGNUM *pub_key, int *ret)
+{
+    return dh_check_pub_key_int(dh, dh->q, pub_key, ret);
+}
+
+int dh_check_pub_key_full(const DH *dh, const BIGNUM *pub_key, int *ret)
+{
+    BIGNUM *q = dh->q;
+
+    if (q == NULL) {
+        if (dh_get_known_q(dh, &q) == 0) {
+            *ret |= DH_CHECK_INVALID_Q_VALUE;
+            return 0;
+        }
+    }
+
+    return dh_check_pub_key_int(dh, q, pub_key, ret);
+}
+

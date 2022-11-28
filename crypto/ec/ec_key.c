@@ -281,8 +281,17 @@ int ec_key_simple_generate_key(EC_KEY *eckey)
     if (!EC_POINT_mul(eckey->group, pub_key, priv_key, NULL, NULL, ctx))
         goto err;
 
-    eckey->priv_key = priv_key;
     eckey->pub_key = pub_key;
+
+    if (FIPS_mode()) {
+        eckey->priv_key = NULL;
+        if (EC_KEY_check_key(eckey) <= 0) {
+            eckey->pub_key = NULL;
+            goto err;
+        }
+    }
+
+    eckey->priv_key = priv_key;
 
     ok = 1;
 
@@ -297,8 +306,23 @@ int ec_key_simple_generate_key(EC_KEY *eckey)
 
 int ec_key_simple_generate_public_key(EC_KEY *eckey)
 {
-    return EC_POINT_mul(eckey->group, eckey->pub_key, eckey->priv_key, NULL,
+    BIGNUM *priv_key;
+    int ret = EC_POINT_mul(eckey->group, eckey->pub_key, eckey->priv_key, NULL,
                         NULL, NULL);
+
+    if (ret <= 0 || !FIPS_mode())
+        return ret;
+
+    /* no need to perform private key test, temporarily hide it */
+    priv_key = eckey->priv_key;
+    eckey->priv_key = NULL;
+    ret = EC_KEY_check_key(eckey);
+    eckey->priv_key = priv_key;
+
+    if (ret <= 0)
+        EC_POINT_set_to_infinity(eckey->group, eckey->pub_key);
+
+    return ret;
 }
 
 int EC_KEY_check_key(const EC_KEY *eckey)

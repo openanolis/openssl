@@ -35,6 +35,7 @@ struct dh_st {
     const DH_METHOD *meth;
     ENGINE *engine;
     CRYPTO_RWLOCK *lock;
+    int nid;
 };
 
 struct dh_method {
@@ -55,3 +56,10 @@ struct dh_method {
     int (*generate_params) (DH *dh, int prime_len, int generator,
                             BN_GENCB *cb);
 };
+
+void dh_cache_nid(DH *dh);
+/* Obtain known q value based on nid or p */
+int dh_get_known_q(const DH *dh, BIGNUM **q);
+/* FIPS mode only check which requires nid set and looks up q based on it. */
+int dh_check_pub_key_full(const DH *dh, const BIGNUM *pub_key, int *ret);
+

@@ -2542,7 +2542,7 @@ DH *ssl_get_auto_dh(SSL *s)
         p = BN_get_rfc3526_prime_4096(NULL);
     else if (dh_secbits >= 128)
         p = BN_get_rfc3526_prime_3072(NULL);
-    else if (dh_secbits >= 112)
+    else if (dh_secbits >= 112 || FIPS_mode())
         p = BN_get_rfc3526_prime_2048(NULL);
     else
         p = BN_get_rfc2409_prime_1024(NULL);

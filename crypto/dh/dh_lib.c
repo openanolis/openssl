@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <openssl/objects.h>
 #include "internal/cryptlib.h"
 #include "internal/refcount.h"
 #include <openssl/bn.h>
@@ -85,6 +86,8 @@ DH *DH_new_method(ENGINE *engine)
         DHerr(DH_F_DH_NEW_METHOD, ERR_R_INIT_FAIL);
         goto err;
     }
+
+    ret->nid = NID_undef;
 
     return ret;
 
@@ -205,7 +208,10 @@ int DH_set0_pqg(DH *dh, BIGNUM *p, BIGNUM *q, BIGNUM *g)
         dh->g = g;
     }
 
-    if (q != NULL) {
+    dh->nid = NID_undef;
+    dh_cache_nid(dh);
+
+    if (q != NULL && dh->nid == NID_undef) {
         dh->length = BN_num_bits(q);
     }
 

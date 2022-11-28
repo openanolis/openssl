@@ -120,10 +120,18 @@ static int generate_key(DH *dh)
     BIGNUM *pub_key = NULL, *priv_key = NULL;
 
 #ifdef OPENSSL_FIPS
-    if (FIPS_mode()
-        && (BN_num_bits(dh->p) < OPENSSL_DH_FIPS_MIN_MODULUS_BITS)) {
-        DHerr(DH_F_GENERATE_KEY, DH_R_KEY_SIZE_TOO_SMALL);
-        return 0;
+    if (FIPS_mode()) {
+        if (BN_num_bits(dh->p) < OPENSSL_DH_FIPS_MIN_MODULUS_BITS) {
+            DHerr(DH_F_GENERATE_KEY, DH_R_KEY_SIZE_TOO_SMALL);
+            return 0;
+        }
+        if (dh->nid == NID_undef)
+            dh_cache_nid(dh);
+        if (dh->nid == NID_undef || dh->length > BN_num_bits(dh->p) - 2
+            || dh->length < 224) {
+            DHerr(DH_F_GENERATE_KEY, DH_R_NON_FIPS_METHOD);
+            return 0;
+        }
     }
 #endif
 
@@ -159,7 +167,15 @@ static int generate_key(DH *dh)
     }
 
     if (generate_new_key) {
-        if (dh->q) {
+        if (FIPS_mode()) {
+            do {
+                if (!BN_priv_rand(priv_key, dh->length, BN_RAND_TOP_ANY, BN_RAND_BOTTOM_ANY))
+                    goto err;
+                if (!BN_add_word(priv_key, 1))
+                    goto err;
+            }
+            while (BN_num_bits(priv_key) > dh->length);
+        } else if (dh->q) {
             do {
                 if (!BN_priv_rand_range(priv_key, dh->q))
                     goto err;
@@ -195,6 +211,15 @@ static int generate_key(DH *dh)
         }
         /* We MUST free prk before any further use of priv_key */
         BN_clear_free(prk);
+
+        if (FIPS_mode()) {
+            int check_result;
+
+            if (!dh_check_pub_key_full(dh, pub_key, &check_result) || check_result) {
+                DHerr(DH_F_GENERATE_KEY, DH_R_INVALID_PUBKEY);
+                goto err;
+            }
+        }
     }
 
     dh->pub_key = pub_key;
@@ -217,6 +242,7 @@ static int compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     BN_CTX *ctx = NULL;
     BN_MONT_CTX *mont = NULL;
     BIGNUM *tmp;
+    BIGNUM *p1;
     int ret = -1;
     int check_result;
 
@@ -260,6 +286,18 @@ static int compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
 
     if (!dh->
         meth->bn_mod_exp(dh, tmp, pub_key, dh->priv_key, dh->p, ctx, mont)) {
+        DHerr(DH_F_COMPUTE_KEY, ERR_R_BN_LIB);
+        goto err;
+    }
+
+    if (BN_is_zero(tmp) || BN_is_one(tmp) || BN_is_negative(tmp)) {
+        DHerr(DH_F_COMPUTE_KEY, ERR_R_BN_LIB);
+        goto err;
+    }
+
+    if ((p1 = BN_CTX_get(ctx)) == NULL
+        || !BN_sub(p1, dh->p, BN_value_one())
+        || BN_cmp(p1, tmp) <= 0) {
         DHerr(DH_F_COMPUTE_KEY, ERR_R_BN_LIB);
         goto err;
     }
