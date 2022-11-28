@@ -145,6 +145,11 @@ int ec_GFp_simple_group_set_curve(EC_GROUP *group,
         return 0;
     }
 
+    if (BN_num_bits(p) < 224) {
+        ECerr(EC_F_EC_GFP_SIMPLE_GROUP_SET_CURVE, EC_R_UNSUPPORTED_FIELD);
+        return 0;
+    }
+
     if (ctx == NULL) {
         ctx = new_ctx = BN_CTX_new();
         if (ctx == NULL)

@@ -490,90 +490,30 @@ static double rsa_results[RSA_NUM][2];  /* 2 ops: sign then verify */
 #endif /* OPENSSL_NO_RSA */
 
 enum {
-    R_EC_P160,
-    R_EC_P192,
     R_EC_P224,
     R_EC_P256,
     R_EC_P384,
     R_EC_P521,
-#ifndef OPENSSL_NO_EC2M
-    R_EC_K163,
-    R_EC_K233,
-    R_EC_K283,
-    R_EC_K409,
-    R_EC_K571,
-    R_EC_B163,
-    R_EC_B233,
-    R_EC_B283,
-    R_EC_B409,
-    R_EC_B571,
-#endif
-    R_EC_BRP256R1,
-    R_EC_BRP256T1,
-    R_EC_BRP384R1,
-    R_EC_BRP384T1,
-    R_EC_BRP512R1,
-    R_EC_BRP512T1,
     R_EC_X25519,
     R_EC_X448
 };
 
 #ifndef OPENSSL_NO_EC
 static OPT_PAIR ecdsa_choices[] = {
-    {"ecdsap160", R_EC_P160},
-    {"ecdsap192", R_EC_P192},
     {"ecdsap224", R_EC_P224},
     {"ecdsap256", R_EC_P256},
     {"ecdsap384", R_EC_P384},
     {"ecdsap521", R_EC_P521},
-# ifndef OPENSSL_NO_EC2M
-    {"ecdsak163", R_EC_K163},
-    {"ecdsak233", R_EC_K233},
-    {"ecdsak283", R_EC_K283},
-    {"ecdsak409", R_EC_K409},
-    {"ecdsak571", R_EC_K571},
-    {"ecdsab163", R_EC_B163},
-    {"ecdsab233", R_EC_B233},
-    {"ecdsab283", R_EC_B283},
-    {"ecdsab409", R_EC_B409},
-    {"ecdsab571", R_EC_B571},
-# endif
-    {"ecdsabrp256r1", R_EC_BRP256R1},
-    {"ecdsabrp256t1", R_EC_BRP256T1},
-    {"ecdsabrp384r1", R_EC_BRP384R1},
-    {"ecdsabrp384t1", R_EC_BRP384T1},
-    {"ecdsabrp512r1", R_EC_BRP512R1},
-    {"ecdsabrp512t1", R_EC_BRP512T1}
 };
 # define ECDSA_NUM       OSSL_NELEM(ecdsa_choices)
 
 static double ecdsa_results[ECDSA_NUM][2];    /* 2 ops: sign then verify */
 
 static const OPT_PAIR ecdh_choices[] = {
-    {"ecdhp160", R_EC_P160},
-    {"ecdhp192", R_EC_P192},
     {"ecdhp224", R_EC_P224},
     {"ecdhp256", R_EC_P256},
     {"ecdhp384", R_EC_P384},
     {"ecdhp521", R_EC_P521},
-# ifndef OPENSSL_NO_EC2M
-    {"ecdhk163", R_EC_K163},
-    {"ecdhk233", R_EC_K233},
-    {"ecdhk283", R_EC_K283},
-    {"ecdhk409", R_EC_K409},
-    {"ecdhk571", R_EC_K571},
-    {"ecdhb163", R_EC_B163},
-    {"ecdhb233", R_EC_B233},
-    {"ecdhb283", R_EC_B283},
-    {"ecdhb409", R_EC_B409},
-    {"ecdhb571", R_EC_B571},
-# endif
-    {"ecdhbrp256r1", R_EC_BRP256R1},
-    {"ecdhbrp256t1", R_EC_BRP256T1},
-    {"ecdhbrp384r1", R_EC_BRP384R1},
-    {"ecdhbrp384t1", R_EC_BRP384T1},
-    {"ecdhbrp512r1", R_EC_BRP512R1},
-    {"ecdhbrp512t1", R_EC_BRP512T1},
     {"ecdhx25519", R_EC_X25519},
     {"ecdhx448", R_EC_X448}
 };
@@ -1502,31 +1442,10 @@ int speed_main(int argc, char **argv)
         unsigned int bits;
     } test_curves[] = {
         /* Prime Curves */
-        {"secp160r1", NID_secp160r1, 160},
-        {"nistp192", NID_X9_62_prime192v1, 192},
         {"nistp224", NID_secp224r1, 224},
         {"nistp256", NID_X9_62_prime256v1, 256},
         {"nistp384", NID_secp384r1, 384},
         {"nistp521", NID_secp521r1, 521},
-# ifndef OPENSSL_NO_EC2M
-        /* Binary Curves */
-        {"nistk163", NID_sect163k1, 163},
-        {"nistk233", NID_sect233k1, 233},
-        {"nistk283", NID_sect283k1, 283},
-        {"nistk409", NID_sect409k1, 409},
-        {"nistk571", NID_sect571k1, 571},
-        {"nistb163", NID_sect163r2, 163},
-        {"nistb233", NID_sect233r1, 233},
-        {"nistb283", NID_sect283r1, 283},
-        {"nistb409", NID_sect409r1, 409},
-        {"nistb571", NID_sect571r1, 571},
-# endif
-        {"brainpoolP256r1", NID_brainpoolP256r1, 256},
-        {"brainpoolP256t1", NID_brainpoolP256t1, 256},
-        {"brainpoolP384r1", NID_brainpoolP384r1, 384},
-        {"brainpoolP384t1", NID_brainpoolP384t1, 384},
-        {"brainpoolP512r1", NID_brainpoolP512r1, 512},
-        {"brainpoolP512t1", NID_brainpoolP512t1, 512},
         /* Other and ECDH only ones */
         {"X25519", NID_X25519, 253},
         {"X448", NID_X448, 448}
@@ -2026,9 +1945,9 @@ int speed_main(int argc, char **argv)
 #  endif
 
 #  ifndef OPENSSL_NO_EC
-    ecdsa_c[R_EC_P160][0] = count / 1000;
-    ecdsa_c[R_EC_P160][1] = count / 1000 / 2;
-    for (i = R_EC_P192; i <= R_EC_P521; i++) {
+    ecdsa_c[R_EC_P224][0] = count / 1000;
+    ecdsa_c[R_EC_P224][1] = count / 1000 / 2;
+    for (i = R_EC_P256; i <= R_EC_P521; i++) {
         ecdsa_c[i][0] = ecdsa_c[i - 1][0] / 2;
         ecdsa_c[i][1] = ecdsa_c[i - 1][1] / 2;
         if (ecdsa_doit[i] <= 1 && ecdsa_c[i][0] == 0)
@@ -2040,7 +1959,7 @@ int speed_main(int argc, char **argv)
             }
         }
     }
-#   ifndef OPENSSL_NO_EC2M
+#   if 0
     ecdsa_c[R_EC_K163][0] = count / 1000;
     ecdsa_c[R_EC_K163][1] = count / 1000 / 2;
     for (i = R_EC_K233; i <= R_EC_K571; i++) {
@@ -2071,8 +1990,8 @@ int speed_main(int argc, char **argv)
     }
 #   endif
 
-    ecdh_c[R_EC_P160][0] = count / 1000;
-    for (i = R_EC_P192; i <= R_EC_P521; i++) {
+    ecdh_c[R_EC_P224][0] = count / 1000;
+    for (i = R_EC_P256; i <= R_EC_P521; i++) {
         ecdh_c[i][0] = ecdh_c[i - 1][0] / 2;
         if (ecdh_doit[i] <= 1 && ecdh_c[i][0] == 0)
             ecdh_doit[i] = 0;
@@ -2082,7 +2001,7 @@ int speed_main(int argc, char **argv)
             }
         }
     }
-#   ifndef OPENSSL_NO_EC2M
+#   if 0
     ecdh_c[R_EC_K163][0] = count / 1000;
     for (i = R_EC_K233; i <= R_EC_K571; i++) {
         ecdh_c[i][0] = ecdh_c[i - 1][0] / 2;

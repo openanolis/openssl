@@ -32,23 +32,6 @@ typedef struct {
 } ecdsa_cavs_kat_t;
 
 static const ecdsa_cavs_kat_t ecdsa_cavs_kats[] = {
-    /* prime KATs from X9.62 */
-    {NID_X9_62_prime192v1, NID_sha1,
-     "616263",                  /* "abc" */
-     "1a8d598fc15bf0fd89030b5cb1111aeb92ae8baf5ea475fb",
-     "0462b12d60690cdcf330babab6e69763b471f994dd702d16a563bf5ec08069705ffff65e"
-     "5ca5c0d69716dfcb3474373902",
-     "fa6de29746bbeb7f8bb1e761f85f7dfb2983169d82fa2f4e",
-     "885052380ff147b734c330c43d39b2c4a89f29b0f749fead",
-     "e9ecc78106def82bf1070cf1d4d804c3cb390046951df686"},
-    {NID_X9_62_prime239v1, NID_sha1,
-     "616263",                  /* "abc" */
-     "7ef7c6fabefffdea864206e80b0b08a9331ed93e698561b64ca0f7777f3d",
-     "045b6dc53bc61a2548ffb0f671472de6c9521a9d2d2534e65abfcbd5fe0c707fd9f1ed2e"
-     "65f09f6ce0893baf5e8e31e6ae82ea8c3592335be906d38dee",
-     "656c7196bf87dcc5d1f1020906df2782360d36b2de7a17ece37d503784af",
-     "2cb7f36803ebb9c427c58d8265f11fc5084747133078fc279de874fbecb0",
-     "2eeae988104e9c2234a3c2beb1f53bfa5dc11ff36a875d1e3ccb1f7e45cf"},
     /* prime KATs from NIST CAVP */
     {NID_secp224r1, NID_sha224,
      "699325d6fc8fbbb4981a6ded3c3a54ad2e4e3db8a5669201912064c64e700c139248cdc1"
