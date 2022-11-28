@@ -823,7 +823,7 @@ uninstall_runtime_libs:
 install_man_docs:
 	@[ -n "$(INSTALLTOP)" ] || (echo INSTALLTOP should not be empty; exit 1)
 	@$(ECHO) "*** Installing manpages"
-	$(PERL) $(SRCDIR)/util/process_docs.pl \
+	TZ=UTC $(PERL) $(SRCDIR)/util/process_docs.pl \
 		"--destdir=$(DESTDIR)$(MANDIR)" --type=man --suffix=$(MANSUFFIX)
 
 uninstall_man_docs:
@@ -835,7 +835,7 @@ uninstall_man_docs:
 install_html_docs:
 	@[ -n "$(INSTALLTOP)" ] || (echo INSTALLTOP should not be empty; exit 1)
 	@$(ECHO) "*** Installing HTML manpages"
-	$(PERL) $(SRCDIR)/util/process_docs.pl \
+	TZ=UTC $(PERL) $(SRCDIR)/util/process_docs.pl \
 		"--destdir=$(DESTDIR)$(HTMLDIR)" --type=html
 
 uninstall_html_docs:
