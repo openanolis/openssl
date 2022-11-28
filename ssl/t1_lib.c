@@ -678,6 +678,36 @@ static const uint16_t tls12_sigalgs[] = {
 #endif
 };
 
+static const uint16_t tls12_fips_sigalgs[] = {
+#ifndef OPENSSL_NO_EC
+    TLSEXT_SIGALG_ecdsa_secp256r1_sha256,
+    TLSEXT_SIGALG_ecdsa_secp384r1_sha384,
+    TLSEXT_SIGALG_ecdsa_secp521r1_sha512,
+#endif
+
+    TLSEXT_SIGALG_rsa_pss_pss_sha256,
+    TLSEXT_SIGALG_rsa_pss_pss_sha384,
+    TLSEXT_SIGALG_rsa_pss_pss_sha512,
+    TLSEXT_SIGALG_rsa_pss_rsae_sha256,
+    TLSEXT_SIGALG_rsa_pss_rsae_sha384,
+    TLSEXT_SIGALG_rsa_pss_rsae_sha512,
+
+    TLSEXT_SIGALG_rsa_pkcs1_sha256,
+    TLSEXT_SIGALG_rsa_pkcs1_sha384,
+    TLSEXT_SIGALG_rsa_pkcs1_sha512,
+
+#ifndef OPENSSL_NO_EC
+    TLSEXT_SIGALG_ecdsa_sha224,
+#endif
+    TLSEXT_SIGALG_rsa_pkcs1_sha224,
+#ifndef OPENSSL_NO_DSA
+    TLSEXT_SIGALG_dsa_sha224,
+    TLSEXT_SIGALG_dsa_sha256,
+    TLSEXT_SIGALG_dsa_sha384,
+    TLSEXT_SIGALG_dsa_sha512,
+#endif
+};
+
 #ifndef OPENSSL_NO_EC
 static const uint16_t suiteb_sigalgs[] = {
     TLSEXT_SIGALG_ecdsa_secp256r1_sha256,
@@ -894,6 +924,8 @@ static const SIGALG_LOOKUP *tls1_get_legacy_sigalg(const SSL *s, int idx)
     }
     if (idx < 0 || idx >= (int)OSSL_NELEM(tls_default_sigalg))
         return NULL;
+    if (FIPS_mode()) /* We do not allow legacy SHA1 signatures in FIPS mode */
+        return NULL;
     if (SSL_USE_SIGALGS(s) || idx != SSL_PKEY_RSA) {
         const SIGALG_LOOKUP *lu = tls1_lookup_sigalg(tls_default_sigalg[idx]);
 
@@ -954,6 +986,9 @@ size_t tls12_get_psigalgs(SSL *s, int sent, const uint16_t **psigs)
     } else if (s->cert->conf_sigalgs) {
         *psigs = s->cert->conf_sigalgs;
         return s->cert->conf_sigalgslen;
+    } else if (FIPS_mode()) {
+        *psigs = tls12_fips_sigalgs;
+        return OSSL_NELEM(tls12_fips_sigalgs);
     } else {
         *psigs = tls12_sigalgs;
         return OSSL_NELEM(tls12_sigalgs);
@@ -973,6 +1008,9 @@ int tls_check_sigalg_curve(const SSL *s, int curve)
     if (s->cert->conf_sigalgs) {
         sigs = s->cert->conf_sigalgs;
         siglen = s->cert->conf_sigalgslen;
+    } else if (FIPS_mode()) {
+        sigs = tls12_fips_sigalgs;
+        siglen = OSSL_NELEM(tls12_fips_sigalgs);
     } else {
         sigs = tls12_sigalgs;
         siglen = OSSL_NELEM(tls12_sigalgs);
@@ -1617,6 +1655,8 @@ static int tls12_sigalg_allowed(const SSL *s, int op, const SIGALG_LOOKUP *lu)
     if (lu->sig == NID_id_GostR3410_2012_256
             || lu->sig == NID_id_GostR3410_2012_512
             || lu->sig == NID_id_GostR3410_2001) {
+        if (FIPS_mode())
+            return 0;
         /* We never allow GOST sig algs on the server with TLSv1.3 */
         if (s->server && SSL_IS_TLS13(s))
             return 0;
@@ -2874,6 +2914,13 @@ int tls_choose_sigalg(SSL *s, int fatalerrs)
                 const uint16_t *sent_sigs;
                 size_t sent_sigslen;
 
+                if (fatalerrs && FIPS_mode()) {
+                    /* There are no suitable legacy algorithms in FIPS mode */
+                    SSLfatal(s, SSL_AD_HANDSHAKE_FAILURE,
+                             SSL_F_TLS_CHOOSE_SIGALG,
+                             SSL_R_NO_SUITABLE_SIGNATURE_ALGORITHM);
+                    return 0;
+                }
                 if ((lu = tls1_get_legacy_sigalg(s, -1)) == NULL) {
                     if (!fatalerrs)
                         return 1;

@@ -13,6 +13,7 @@
 #include <openssl/err.h>
 #include <openssl/obj_mac.h>
 #include <openssl/opensslconf.h>
+#include <openssl/crypto.h>
 #include "internal/nelem.h"
 
 typedef struct {
@@ -237,6 +238,7 @@ static const struct {
 
 typedef struct _ec_list_element_st {
     int nid;
+    int fips_allowed;
     const EC_CURVE_DATA *data;
     const EC_METHOD *(*meth) (void);
     const char *comment;
@@ -246,23 +248,23 @@ static const ec_list_element curve_list[] = {
     /* prime field curves */
     /* secg curves */
 #ifndef OPENSSL_NO_EC_NISTP_64_GCC_128
-    {NID_secp224r1, &_EC_NIST_PRIME_224.h, EC_GFp_nistp224_method,
+    {NID_secp224r1, 1, &_EC_NIST_PRIME_224.h, EC_GFp_nistp224_method,
      "NIST/SECG curve over a 224 bit prime field"},
 #else
-    {NID_secp224r1, &_EC_NIST_PRIME_224.h, 0,
+    {NID_secp224r1, 1, &_EC_NIST_PRIME_224.h, 0,
      "NIST/SECG curve over a 224 bit prime field"},
 #endif
-    {NID_secp256k1, &_EC_SECG_PRIME_256K1.h, 0,
+    {NID_secp256k1, 0, &_EC_SECG_PRIME_256K1.h, 0,
      "SECG curve over a 256 bit prime field"},
     /* SECG secp256r1 is the same as X9.62 prime256v1 and hence omitted */
-    {NID_secp384r1, &_EC_NIST_PRIME_384.h,
+    {NID_secp384r1, 1, &_EC_NIST_PRIME_384.h,
 # if defined(S390X_EC_ASM)
      EC_GFp_s390x_nistp384_method,
 # else
      0,
 # endif
      "NIST/SECG curve over a 384 bit prime field"},
-    {NID_secp521r1, &_EC_NIST_PRIME_521.h,
+    {NID_secp521r1, 1, &_EC_NIST_PRIME_521.h,
 # if defined(S390X_EC_ASM)
      EC_GFp_s390x_nistp521_method,
 # elif !defined(OPENSSL_NO_EC_NISTP_64_GCC_128)
@@ -272,7 +274,7 @@ static const ec_list_element curve_list[] = {
 # endif
      "NIST/SECG curve over a 521 bit prime field"},
     /* X9.62 curves */
-    {NID_X9_62_prime256v1, &_EC_X9_62_PRIME_256V1.h,
+    {NID_X9_62_prime256v1, 1, &_EC_X9_62_PRIME_256V1.h,
 #if defined(ECP_NISTZ256_ASM)
      EC_GFp_nistz256_method,
 # elif defined(S390X_EC_ASM)
@@ -404,6 +406,10 @@ EC_GROUP *EC_GROUP_new_by_curve_name(int nid)
 
     for (i = 0; i < curve_list_length; i++)
         if (curve_list[i].nid == nid) {
+            if (!curve_list[i].fips_allowed && FIPS_mode()) {
+                ECerr(EC_F_EC_GROUP_NEW_BY_CURVE_NAME, EC_R_NOT_A_NIST_PRIME);
+                return NULL;
+            }
             ret = ec_group_new_from_data(curve_list[i]);
             break;
         }
@@ -418,19 +424,31 @@ EC_GROUP *EC_GROUP_new_by_curve_name(int nid)
 
 size_t EC_get_builtin_curves(EC_builtin_curve *r, size_t nitems)
 {
-    size_t i, min;
+    size_t i, j, num;
+    int fips_mode = FIPS_mode();
 
-    if (r == NULL || nitems == 0)
-        return curve_list_length;
+    num = curve_list_length;
+    if (fips_mode)
+        for (i = 0; i < curve_list_length; i++) {
+            if (!curve_list[i].fips_allowed)
+                --num;
+        }
 
-    min = nitems < curve_list_length ? nitems : curve_list_length;
-
-    for (i = 0; i < min; i++) {
-        r[i].nid = curve_list[i].nid;
-        r[i].comment = curve_list[i].comment;
+    if (r == NULL || nitems == 0) {
+        return num;
     }
 
-    return curve_list_length;
+    for (i = 0, j = 0; i < curve_list_length; i++) {
+        if (j >= nitems)
+            break;
+        if (!fips_mode || curve_list[i].fips_allowed) {
+            r[j].nid = curve_list[i].nid;
+            r[j].comment = curve_list[i].comment;
+            ++j;
+        }
+    }
+
+    return num;
 }
 
 /* Functions to translate between common NIST curve names and NIDs */
