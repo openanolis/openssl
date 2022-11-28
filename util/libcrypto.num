@@ -4634,6 +4634,6 @@ EVP_KDF_vctrl                           6594	1_1_1b	EXIST::FUNCTION:
 EVP_KDF_ctrl_str                        6595	1_1_1b	EXIST::FUNCTION:
 EVP_KDF_size                            6596	1_1_1b	EXIST::FUNCTION:
 EVP_KDF_derive                          6597	1_1_1b	EXIST::FUNCTION:
-ASN1_item_verify_ctx                    6700	1_1_1t	EXIST::FUNCTION:
-X509_verify_ctx                         6701	1_1_1t	EXIST::FUNCTION:
-X509_REQ_verify_ctx                     6702	1_1_1t	EXIST::FUNCTION:
+ASN1_item_verify_ctx                    6700	1_1_1k	EXIST::FUNCTION:
+X509_verify_ctx                         6701	1_1_1k	EXIST::FUNCTION:
+X509_REQ_verify_ctx                     6702	1_1_1k	EXIST::FUNCTION:
