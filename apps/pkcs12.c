@@ -123,7 +123,7 @@ int pkcs12_main(int argc, char **argv)
     int export_cert = 0, options = 0, chain = 0, twopass = 0, keytype = 0;
     int iter = PKCS12_DEFAULT_ITER, maciter = PKCS12_DEFAULT_ITER;
 #ifndef OPENSSL_NO_RC2
-    int cert_pbe = NID_pbe_WithSHA1And40BitRC2_CBC;
+    int cert_pbe = FIPS_mode() ? NID_pbe_WithSHA1And3_Key_TripleDES_CBC : NID_pbe_WithSHA1And40BitRC2_CBC;
 #else
     int cert_pbe = NID_pbe_WithSHA1And3_Key_TripleDES_CBC;
 #endif

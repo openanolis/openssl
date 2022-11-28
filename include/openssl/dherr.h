@@ -36,6 +36,9 @@ int ERR_load_DH_strings(void);
 #  define DH_F_DH_CMS_DECRYPT                              114
 #  define DH_F_DH_CMS_SET_PEERKEY                          115
 #  define DH_F_DH_CMS_SET_SHARED_INFO                      116
+#  define DH_F_DH_COMPUTE_KEY                              203
+#  define DH_F_DH_GENERATE_KEY                             202
+#  define DH_F_DH_GENERATE_PARAMETERS_EX                   201
 #  define DH_F_DH_METH_DUP                                 117
 #  define DH_F_DH_METH_NEW                                 118
 #  define DH_F_DH_METH_SET1_NAME                           119
@@ -73,12 +76,14 @@ int ERR_load_DH_strings(void);
 #  define DH_R_INVALID_PARAMETER_NID                       114
 #  define DH_R_INVALID_PUBKEY                              102
 #  define DH_R_KDF_PARAMETER_ERROR                         112
+#  define DH_R_KEY_SIZE_TOO_SMALL                          201
 #  define DH_R_KEYS_NOT_SET                                108
 #  define DH_R_MISSING_PUBKEY                              125
 #  define DH_R_MODULUS_TOO_LARGE                           103
 #  define DH_R_NOT_SUITABLE_GENERATOR                      120
 #  define DH_R_NO_PARAMETERS_SET                           107
 #  define DH_R_NO_PRIVATE_VALUE                            100
+#  define DH_R_NON_FIPS_METHOD                             202
 #  define DH_R_PARAMETER_ENCODING_ERROR                    105
 #  define DH_R_PEER_KEY_ERROR                              111
 #  define DH_R_SHARED_INFO_ERROR                           113

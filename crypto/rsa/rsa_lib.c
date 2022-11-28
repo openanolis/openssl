@@ -34,6 +34,12 @@ int RSA_set_method(RSA *rsa, const RSA_METHOD *meth)
      * to deal with which ENGINE it comes from.
      */
     const RSA_METHOD *mtmp;
+#ifdef OPENSSL_FIPS
+    if (FIPS_mode() && !(meth->flags & RSA_FLAG_FIPS_METHOD)) {
+        RSAerr(RSA_F_RSA_SET_METHOD, RSA_R_NON_FIPS_RSA_METHOD);
+        return 0;
+    }
+#endif
     mtmp = rsa->meth;
     if (mtmp->finish)
         mtmp->finish(rsa);
@@ -66,7 +72,6 @@ RSA *RSA_new_method(ENGINE *engine)
 
     ret->meth = RSA_get_default_method();
 #ifndef OPENSSL_NO_ENGINE
-    ret->flags = ret->meth->flags & ~RSA_FLAG_NON_FIPS_ALLOW;
     if (engine) {
         if (!ENGINE_init(engine)) {
             RSAerr(RSA_F_RSA_NEW_METHOD, ERR_R_ENGINE_LIB);
@@ -84,8 +89,19 @@ RSA *RSA_new_method(ENGINE *engine)
         }
     }
 #endif
+#ifdef OPENSSL_FIPS
+    if (FIPS_mode() && !(ret->meth->flags & RSA_FLAG_FIPS_METHOD)) {
+        RSAerr(RSA_F_RSA_NEW_METHOD, RSA_R_NON_FIPS_RSA_METHOD);
+# ifndef OPENSSL_NO_ENGINE
+        if (ret->engine)
+            ENGINE_finish(ret->engine);
+# endif
+        OPENSSL_free(ret);
+        return NULL;
+    }
+#endif
 
-    ret->flags = ret->meth->flags & ~RSA_FLAG_NON_FIPS_ALLOW;
+    ret->flags = ret->meth->flags;
     if (!CRYPTO_new_ex_data(CRYPTO_EX_INDEX_RSA, ret, &ret->ex_data)) {
         goto err;
     }

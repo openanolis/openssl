@@ -52,6 +52,9 @@ void sha1_block_data_order(SHA_CTX *c, const void *p, size_t num);
 
 int HASH_INIT(SHA_CTX *c)
 {
+#if defined(OPENSSL_FIPS)
+    FIPS_selftest_check();
+#endif
     memset(c, 0, sizeof(*c));
     c->h0 = INIT_DATA_h0;
     c->h1 = INIT_DATA_h1;

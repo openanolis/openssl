@@ -192,6 +192,9 @@ int EVP_CIPHER_impl_ctx_size(const EVP_CIPHER *e)
 int EVP_Cipher(EVP_CIPHER_CTX *ctx, unsigned char *out,
                const unsigned char *in, unsigned int inl)
 {
+#ifdef OPENSSL_FIPS
+    FIPS_selftest_check();
+#endif
     return ctx->cipher->do_cipher(ctx, out, in, inl);
 }
 

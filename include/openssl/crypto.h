@@ -331,6 +331,11 @@ int OPENSSL_isservice(void);
 int FIPS_mode(void);
 int FIPS_mode_set(int r);
 
+# ifdef OPENSSL_FIPS
+/* die if FIPS selftest failed */
+void FIPS_selftest_check(void);
+# endif
+
 void OPENSSL_init(void);
 # ifdef OPENSSL_SYS_UNIX
 void OPENSSL_fork_prepare(void);

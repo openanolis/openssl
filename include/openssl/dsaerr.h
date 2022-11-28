@@ -29,8 +29,11 @@ int ERR_load_DSA_strings(void);
  */
 #  define DSA_F_DSAPARAMS_PRINT                            100
 #  define DSA_F_DSAPARAMS_PRINT_FP                         101
+#  define DSA_F_DSA_BUILTIN_KEYGEN                         202
 #  define DSA_F_DSA_BUILTIN_PARAMGEN                       125
 #  define DSA_F_DSA_BUILTIN_PARAMGEN2                      126
+#  define DSA_F_DSA_GENERATE_KEY                           201
+#  define DSA_F_DSA_GENERATE_PARAMETERS_EX                 200
 #  define DSA_F_DSA_DO_SIGN                                112
 #  define DSA_F_DSA_DO_VERIFY                              113
 #  define DSA_F_DSA_METH_DUP                               127
@@ -60,10 +63,13 @@ int ERR_load_DSA_strings(void);
 #  define DSA_R_DECODE_ERROR                               104
 #  define DSA_R_INVALID_DIGEST_TYPE                        106
 #  define DSA_R_INVALID_PARAMETERS                         112
+#  define DSA_R_KEY_SIZE_INVALID                           201
+#  define DSA_R_KEY_SIZE_TOO_SMALL                         202
 #  define DSA_R_MISSING_PARAMETERS                         101
 #  define DSA_R_MISSING_PRIVATE_KEY                        111
 #  define DSA_R_MODULUS_TOO_LARGE                          103
 #  define DSA_R_NO_PARAMETERS_SET                          107
+#  define DSA_R_NON_FIPS_DSA_METHOD                        200
 #  define DSA_R_PARAMETER_ENCODING_ERROR                   105
 #  define DSA_R_Q_NOT_PRIME                                113
 #  define DSA_R_SEED_LEN_SMALL                             110

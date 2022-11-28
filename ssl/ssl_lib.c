@@ -2981,6 +2981,11 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth)
     if (!OPENSSL_init_ssl(OPENSSL_INIT_LOAD_SSL_STRINGS, NULL))
         return NULL;
 
+    if (FIPS_mode() && (meth->version < TLS1_VERSION)) {
+        SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_AT_LEAST_TLS_1_0_NEEDED_IN_FIPS_MODE);
+        return NULL;
+    }
+
     if (SSL_get_ex_data_X509_STORE_CTX_idx() < 0) {
         SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_X509_VERIFICATION_SETUP_PROBLEMS);
         goto err;
@@ -3037,13 +3042,17 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth)
     if (ret->param == NULL)
         goto err;
 
-    if ((ret->md5 = EVP_get_digestbyname("ssl3-md5")) == NULL) {
-        SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_UNABLE_TO_LOAD_SSL3_MD5_ROUTINES);
-        goto err2;
-    }
-    if ((ret->sha1 = EVP_get_digestbyname("ssl3-sha1")) == NULL) {
-        SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_UNABLE_TO_LOAD_SSL3_SHA1_ROUTINES);
-        goto err2;
+    if (!FIPS_mode()) {
+        if ((ret->md5 = EVP_get_digestbyname("ssl3-md5")) == NULL) {
+            SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_UNABLE_TO_LOAD_SSL3_MD5_ROUTINES);
+            goto err2;
+        }
+        if ((ret->sha1 = EVP_get_digestbyname("ssl3-sha1")) == NULL) {
+            SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_UNABLE_TO_LOAD_SSL3_SHA1_ROUTINES);
+            goto err2;
+        }
+    } else {
+        ret->min_proto_version = TLS1_VERSION;
     }
 
     if ((ret->ca_names = sk_X509_NAME_new_null()) == NULL)

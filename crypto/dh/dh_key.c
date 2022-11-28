@@ -11,6 +11,9 @@
 #include "internal/cryptlib.h"
 #include "dh_local.h"
 #include "crypto/bn.h"
+#ifdef OPENSSL_FIPS
+# include <openssl/fips.h>
+#endif
 
 static int generate_key(DH *dh);
 static int compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh);
@@ -34,6 +37,13 @@ int DH_compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
     int ret = 0, i;
     volatile size_t npad = 0, mask = 1;
 
+#ifdef OPENSSL_FIPS
+    if (FIPS_mode() && !(dh->meth->flags & DH_FLAG_FIPS_METHOD)
+        && !(dh->flags & DH_FLAG_NON_FIPS_ALLOW)) {
+        DHerr(DH_F_DH_COMPUTE_KEY, DH_R_NON_FIPS_METHOD);
+        return 0;
+    }
+#endif
     /* compute the key; ret is constant unless compute_key is external */
     if ((ret = dh->meth->compute_key(key, pub_key, dh)) <= 0)
         return ret;
@@ -108,6 +118,14 @@ static int generate_key(DH *dh)
     BN_CTX *ctx = NULL;
     BN_MONT_CTX *mont = NULL;
     BIGNUM *pub_key = NULL, *priv_key = NULL;
+
+#ifdef OPENSSL_FIPS
+    if (FIPS_mode()
+        && (BN_num_bits(dh->p) < OPENSSL_DH_FIPS_MIN_MODULUS_BITS)) {
+        DHerr(DH_F_GENERATE_KEY, DH_R_KEY_SIZE_TOO_SMALL);
+        return 0;
+    }
+#endif
 
     if (BN_num_bits(dh->p) > OPENSSL_DH_MAX_MODULUS_BITS) {
         DHerr(DH_F_GENERATE_KEY, DH_R_MODULUS_TOO_LARGE);
@@ -206,6 +224,13 @@ static int compute_key(unsigned char *key, const BIGNUM *pub_key, DH *dh)
         DHerr(DH_F_COMPUTE_KEY, DH_R_MODULUS_TOO_LARGE);
         goto err;
     }
+#ifdef OPENSSL_FIPS
+    if (FIPS_mode()
+        && (BN_num_bits(dh->p) < OPENSSL_DH_FIPS_MIN_MODULUS_BITS)) {
+        DHerr(DH_F_COMPUTE_KEY, DH_R_KEY_SIZE_TOO_SMALL);
+        goto err;
+    }
+#endif
 
     ctx = BN_CTX_new();
     if (ctx == NULL)
@@ -255,6 +280,9 @@ static int dh_bn_mod_exp(const DH *dh, BIGNUM *r,
 
 static int dh_init(DH *dh)
 {
+#ifdef OPENSSL_FIPS
+    FIPS_selftest_check();
+#endif
     dh->flags |= DH_FLAG_CACHE_MONT_P;
     return 1;
 }

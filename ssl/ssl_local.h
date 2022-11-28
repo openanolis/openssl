@@ -1515,6 +1515,7 @@ typedef struct tls_group_info_st {
 # define TLS_CURVE_PRIME         0x0
 # define TLS_CURVE_CHAR2         0x1
 # define TLS_CURVE_CUSTOM        0x2
+# define TLS_CURVE_FIPS          0x80
 
 typedef struct cert_pkey_st CERT_PKEY;
 

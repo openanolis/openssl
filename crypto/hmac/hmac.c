@@ -44,6 +44,13 @@ int HMAC_Init_ex(HMAC_CTX *ctx, const void *key, int len,
         return 0;
 
     if (key != NULL) {
+#ifdef OPENSSL_FIPS
+        if (FIPS_mode() && !(EVP_MD_flags(md) & EVP_MD_FLAG_FIPS)
+            && (!EVP_MD_CTX_test_flags(ctx->md_ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW)
+                || !EVP_MD_CTX_test_flags(ctx->i_ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW)
+                || !EVP_MD_CTX_test_flags(ctx->o_ctx, EVP_MD_CTX_FLAG_NON_FIPS_ALLOW)))
+            goto err;
+#endif
         reset = 1;
 
         j = EVP_MD_block_size(md);

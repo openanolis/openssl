@@ -27,6 +27,10 @@ DEFINE_RUN_ONCE_STATIC(ossl_init_ssl_base)
     fprintf(stderr, "OPENSSL_INIT: ossl_init_ssl_base: "
             "Adding SSL ciphers and digests\n");
 #endif
+#ifdef OPENSSL_FIPS
+    if (!FIPS_mode()) {
+#endif
+
 #ifndef OPENSSL_NO_DES
     EVP_add_cipher(EVP_des_cbc());
     EVP_add_cipher(EVP_des_ede3_cbc());
@@ -87,6 +91,31 @@ DEFINE_RUN_ONCE_STATIC(ossl_init_ssl_base)
     EVP_add_digest(EVP_sha256());
     EVP_add_digest(EVP_sha384());
     EVP_add_digest(EVP_sha512());
+#ifdef OPENSSL_FIPS
+    } else {
+# ifndef OPENSSL_NO_DES
+        EVP_add_cipher(EVP_des_ede3_cbc());
+# endif
+        EVP_add_cipher(EVP_aes_128_cbc());
+        EVP_add_cipher(EVP_aes_192_cbc());
+        EVP_add_cipher(EVP_aes_256_cbc());
+        EVP_add_cipher(EVP_aes_128_gcm());
+        EVP_add_cipher(EVP_aes_256_gcm());
+        EVP_add_cipher(EVP_aes_128_ccm());
+        EVP_add_cipher(EVP_aes_256_ccm());
+# ifndef OPENSSL_NO_MD5
+        /* needed even in the FIPS mode for TLS-1.0 */
+        EVP_add_digest(EVP_md5_sha1());
+# endif
+        EVP_add_digest(EVP_sha1()); /* RSA with sha1 */
+        EVP_add_digest_alias(SN_sha1, "ssl3-sha1");
+        EVP_add_digest_alias(SN_sha1WithRSAEncryption, SN_sha1WithRSA);
+        EVP_add_digest(EVP_sha224());
+        EVP_add_digest(EVP_sha256());
+        EVP_add_digest(EVP_sha384());
+        EVP_add_digest(EVP_sha512());
+    }
+#endif
 #ifndef OPENSSL_NO_COMP
 # ifdef OPENSSL_INIT_DEBUG
     fprintf(stderr, "OPENSSL_INIT: ossl_init_ssl_base: "

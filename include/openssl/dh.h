@@ -31,6 +31,7 @@ extern "C" {
 # endif
 
 # define OPENSSL_DH_FIPS_MIN_MODULUS_BITS 1024
+# define OPENSSL_DH_FIPS_MIN_MODULUS_BITS_GEN 2048
 
 # define DH_FLAG_CACHE_MONT_P     0x01
 

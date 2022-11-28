@@ -211,8 +211,8 @@ static int pkey_dsa_paramgen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
         BN_GENCB_free(pcb);
         return 0;
     }
-    ret = dsa_builtin_paramgen(dsa, dctx->nbits, dctx->qbits, dctx->pmd,
-                               NULL, 0, NULL, NULL, NULL, pcb);
+    ret = dsa_builtin_paramgen2(dsa, dctx->nbits, dctx->qbits, dctx->pmd,
+                               NULL, 0, -1, NULL, NULL, NULL, pcb);
     BN_GENCB_free(pcb);
     if (ret)
         EVP_PKEY_assign_DSA(pkey, dsa);
@@ -241,7 +241,7 @@ static int pkey_dsa_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
 
 const EVP_PKEY_METHOD dsa_pkey_meth = {
     EVP_PKEY_DSA,
-    EVP_PKEY_FLAG_AUTOARGLEN,
+    EVP_PKEY_FLAG_AUTOARGLEN | EVP_PKEY_FLAG_FIPS,
     pkey_dsa_init,
     pkey_dsa_copy,
     pkey_dsa_cleanup,

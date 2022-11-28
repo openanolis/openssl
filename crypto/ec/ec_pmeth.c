@@ -438,7 +438,7 @@ static int pkey_ec_keygen(EVP_PKEY_CTX *ctx, EVP_PKEY *pkey)
 
 const EVP_PKEY_METHOD ec_pkey_meth = {
     EVP_PKEY_EC,
-    0,
+    EVP_PKEY_FLAG_FIPS,
     pkey_ec_init,
     pkey_ec_copy,
     pkey_ec_cleanup,

@@ -19,9 +19,20 @@
 #include <openssl/ec.h>
 #include "ec_local.h"
 
+#ifdef OPENSSL_FIPS
+# include <openssl/fips.h>
+#endif
+
 int ossl_ecdh_compute_key(unsigned char **psec, size_t *pseclen,
                           const EC_POINT *pub_key, const EC_KEY *ecdh)
 {
+#ifdef OPENSSL_FIPS
+    if (FIPS_selftest_failed()) {
+        FIPSerr(FIPS_F_ECDH_COMPUTE_KEY, FIPS_R_FIPS_SELFTEST_FAILED);
+        return -1;
+    }
+#endif
+
     if (ecdh->group->meth->ecdh_compute_key == NULL) {
         ECerr(EC_F_OSSL_ECDH_COMPUTE_KEY, EC_R_CURVE_DOES_NOT_SUPPORT_ECDH);
         return 0;

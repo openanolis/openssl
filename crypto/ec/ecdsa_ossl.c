@@ -14,6 +14,10 @@
 #include "crypto/bn.h"
 #include "ec_local.h"
 
+#ifdef OPENSSL_FIPS
+# include <openssl/fips.h>
+#endif
+
 int ossl_ecdsa_sign(int type, const unsigned char *dgst, int dlen,
                     unsigned char *sig, unsigned int *siglen,
                     const BIGNUM *kinv, const BIGNUM *r, EC_KEY *eckey)
@@ -162,6 +166,13 @@ ECDSA_SIG *ossl_ecdsa_sign_sig(const unsigned char *dgst, int dgst_len,
     const EC_GROUP *group;
     ECDSA_SIG *ret;
     const BIGNUM *priv_key;
+
+#ifdef OPENSSL_FIPS
+    if (FIPS_selftest_failed()) {
+        FIPSerr(FIPS_F_OSSL_ECDSA_SIGN_SIG, FIPS_R_FIPS_SELFTEST_FAILED);
+        return NULL;
+    }
+#endif
 
     group = EC_KEY_get0_group(eckey);
     priv_key = EC_KEY_get0_private_key(eckey);
@@ -324,6 +335,13 @@ int ossl_ecdsa_verify_sig(const unsigned char *dgst, int dgst_len,
     EC_POINT *point = NULL;
     const EC_GROUP *group;
     const EC_POINT *pub_key;
+
+#ifdef OPENSSL_FIPS
+    if (FIPS_selftest_failed()) {
+        FIPSerr(FIPS_F_OSSL_ECDSA_VERIFY_SIG, FIPS_R_FIPS_SELFTEST_FAILED);
+        return -1;
+    }
+#endif
 
     /* check input values */
     if (eckey == NULL || (group = EC_KEY_get0_group(eckey)) == NULL ||

@@ -18,6 +18,9 @@
 
 int SHA224_Init(SHA256_CTX *c)
 {
+# ifdef OPENSSL_FIPS
+    FIPS_selftest_check();
+# endif
     memset(c, 0, sizeof(*c));
     c->h[0] = 0xc1059ed8UL;
     c->h[1] = 0x367cd507UL;
@@ -33,6 +36,9 @@ int SHA224_Init(SHA256_CTX *c)
 
 int SHA256_Init(SHA256_CTX *c)
 {
+# ifdef OPENSSL_FIPS
+    FIPS_selftest_check();
+# endif
     memset(c, 0, sizeof(*c));
     c->h[0] = 0x6a09e667UL;
     c->h[1] = 0xbb67ae85UL;

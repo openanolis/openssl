@@ -131,7 +131,15 @@ static EVP_PKEY_CTX *int_ctx_new(EVP_PKEY *pkey, ENGINE *e, int id)
         pmeth = ENGINE_get_pkey_meth(e, id);
     else
 #endif
+    {
         pmeth = EVP_PKEY_meth_find(id);
+#ifdef OPENSSL_FIPS
+        if (pmeth && !(pmeth->flags & EVP_PKEY_FLAG_FIPS) && FIPS_mode()) {
+            EVPerr(EVP_F_INT_CTX_NEW, EVP_R_DISABLED_FOR_FIPS);
+            return NULL;
+        }
+#endif
+    }
 
     if (pmeth == NULL) {
 #ifndef OPENSSL_NO_ENGINE

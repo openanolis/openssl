@@ -38,6 +38,7 @@ int ERR_load_RAND_strings(void);
 # define RAND_F_RAND_DRBG_SET                             104
 # define RAND_F_RAND_DRBG_SET_DEFAULTS                    121
 # define RAND_F_RAND_DRBG_UNINSTANTIATE                   118
+# define RAND_F_RAND_INIT_FIPS                            200
 # define RAND_F_RAND_LOAD_FILE                            111
 # define RAND_F_RAND_POOL_ACQUIRE_ENTROPY                 122
 # define RAND_F_RAND_POOL_ADD                             103

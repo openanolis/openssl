@@ -69,6 +69,11 @@ DEPRECATEDIN_1_1_0(void RAND_screen(void))
 DEPRECATEDIN_1_1_0(int RAND_event(UINT, WPARAM, LPARAM))
 # endif
 
+# ifdef OPENSSL_FIPS
+/* just stubs for API compatibility */
+void RAND_set_fips_drbg_type(int type, int flags);
+int RAND_init_fips(void);
+# endif
 
 #ifdef  __cplusplus
 }

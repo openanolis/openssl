@@ -14,6 +14,9 @@
 #include <openssl/engine.h>
 #include "crypto/evp.h"
 #include "evp_local.h"
+#ifdef OPENSSL_FIPS
+# include <openssl/fips.h>
+#endif
 
 /* This call frees resources associated with the context */
 int EVP_MD_CTX_reset(EVP_MD_CTX *ctx)
@@ -66,6 +69,12 @@ int EVP_DigestInit(EVP_MD_CTX *ctx, const EVP_MD *type)
 int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *impl)
 {
     EVP_MD_CTX_clear_flags(ctx, EVP_MD_CTX_FLAG_CLEANED);
+#ifdef OPENSSL_FIPS
+    if (FIPS_selftest_failed()) {
+        FIPSerr(FIPS_F_EVP_DIGESTINIT_EX, FIPS_R_FIPS_SELFTEST_FAILED);
+        return 0;
+    }
+#endif
 #ifndef OPENSSL_NO_ENGINE
     /*
      * Whether it's nice or not, "Inits" can be used on "Final"'d contexts so
@@ -119,6 +128,15 @@ int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *impl)
     }
 #endif
     if (ctx->digest != type) {
+#ifdef OPENSSL_FIPS
+        if (FIPS_mode()) {
+            if (!(type->flags & EVP_MD_FLAG_FIPS)
+                && !(ctx->flags & EVP_MD_CTX_FLAG_NON_FIPS_ALLOW)) {
+                EVPerr(EVP_F_EVP_DIGESTINIT_EX, EVP_R_DISABLED_FOR_FIPS);
+                return 0;
+            }
+        }
+#endif
         if (ctx->digest && ctx->digest->ctx_size) {
             OPENSSL_clear_free(ctx->md_data, ctx->digest->ctx_size);
             ctx->md_data = NULL;
@@ -150,6 +168,10 @@ int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *impl)
 
 int EVP_DigestUpdate(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
+#ifdef OPENSSL_FIPS
+    FIPS_selftest_check();
+#endif
+
     if (count == 0)
         return 1;
 
@@ -170,6 +192,9 @@ int EVP_DigestFinal_ex(EVP_MD_CTX *ctx, unsigned char *md, unsigned int *size)
 {
     int ret;
 
+#ifdef OPENSSL_FIPS
+    FIPS_selftest_check();
+#endif
     OPENSSL_assert(ctx->digest->md_size <= EVP_MAX_MD_SIZE);
     ret = ctx->digest->final(ctx, md);
     if (size != NULL)

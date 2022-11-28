@@ -16,6 +16,10 @@
 #include "internal/thread_once.h"
 #include "rand_local.h"
 #include "e_os.h"
+#ifdef OPENSSL_FIPS
+# include <openssl/fips.h>
+# include <openssl/fips_rand.h>
+#endif
 
 #ifndef OPENSSL_NO_ENGINE
 /* non-NULL if default_RAND_meth is ENGINE-provided */
@@ -963,3 +967,15 @@ int RAND_status(void)
         return meth->status();
     return 0;
 }
+
+#ifdef OPENSSL_FIPS
+void RAND_set_fips_drbg_type(int type, int flags)
+{   /* just a stub for ABI compatibility */
+}
+
+int RAND_init_fips(void)
+{
+   /* just a stub for ABI compatibility */
+    return 1;
+}
+#endif

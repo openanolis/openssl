@@ -295,7 +295,7 @@ const EVP_MD *EVP_sha3_##bitlen(void)                \
         NID_sha3_##bitlen,                           \
         NID_RSA_SHA3_##bitlen,                       \
         bitlen / 8,                                  \
-        EVP_MD_FLAG_DIGALGID_ABSENT,                 \
+        EVP_MD_FLAG_DIGALGID_ABSENT | EVP_MD_FLAG_FIPS, \
         s390x_sha3_init,                             \
         s390x_sha3_update,                           \
         s390x_sha3_final,                            \
@@ -308,7 +308,7 @@ const EVP_MD *EVP_sha3_##bitlen(void)                \
         NID_sha3_##bitlen,                           \
         NID_RSA_SHA3_##bitlen,                       \
         bitlen / 8,                                  \
-        EVP_MD_FLAG_DIGALGID_ABSENT,                 \
+        EVP_MD_FLAG_DIGALGID_ABSENT | EVP_MD_FLAG_FIPS, \
         sha3_init,                                   \
         sha3_update,                                 \
         sha3_final,                                  \
@@ -329,7 +329,7 @@ const EVP_MD *EVP_shake##bitlen(void)                \
         NID_shake##bitlen,                           \
         0,                                           \
         bitlen / 8,                                  \
-        EVP_MD_FLAG_XOF,                             \
+        EVP_MD_FLAG_XOF | EVP_MD_FLAG_FIPS,          \
         s390x_shake_init,                            \
         s390x_sha3_update,                           \
         s390x_shake_final,                           \
@@ -343,7 +343,7 @@ const EVP_MD *EVP_shake##bitlen(void)                \
         NID_shake##bitlen,                           \
         0,                                           \
         bitlen / 8,                                  \
-        EVP_MD_FLAG_XOF,                             \
+        EVP_MD_FLAG_XOF | EVP_MD_FLAG_FIPS,          \
         shake_init,                                  \
         sha3_update,                                 \
         sha3_final,                                  \
@@ -367,7 +367,7 @@ const EVP_MD *EVP_sha3_##bitlen(void)           \
         NID_sha3_##bitlen,                      \
         NID_RSA_SHA3_##bitlen,                  \
         bitlen / 8,                             \
-        EVP_MD_FLAG_DIGALGID_ABSENT,            \
+        EVP_MD_FLAG_DIGALGID_ABSENT | EVP_MD_FLAG_FIPS, \
         sha3_init,                              \
         sha3_update,                            \
         sha3_final,                             \
@@ -386,7 +386,7 @@ const EVP_MD *EVP_shake##bitlen(void)           \
         NID_shake##bitlen,                      \
         0,                                      \
         bitlen / 8,                             \
-        EVP_MD_FLAG_XOF,                        \
+        EVP_MD_FLAG_XOF | EVP_MD_FLAG_FIPS,     \
         shake_init,                             \
         sha3_update,                            \
         sha3_final,                             \

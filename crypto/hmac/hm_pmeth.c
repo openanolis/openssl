@@ -180,7 +180,7 @@ static int pkey_hmac_ctrl_str(EVP_PKEY_CTX *ctx,
 
 const EVP_PKEY_METHOD hmac_pkey_meth = {
     EVP_PKEY_HMAC,
-    0,
+    EVP_PKEY_FLAG_FIPS,
     pkey_hmac_init,
     pkey_hmac_copy,
     pkey_hmac_cleanup,
