@@ -24,6 +24,11 @@ int ERR_load_KDF_strings(void);
  * KDF function codes.
  */
 # define KDF_F_HKDF_EXTRACT                               112
+# define KDF_F_KBKDF_CTRL                                 134
+# define KDF_F_KBKDF_CTRL_STR                             135
+# define KDF_F_KBKDF_DERIVE                               136
+# define KDF_F_KBKDF_NEW                                  137
+# define KDF_F_KDF_CIPHER2CTRL                            138
 # define KDF_F_KDF_HKDF_DERIVE                            113
 # define KDF_F_KDF_HKDF_NEW                               114
 # define KDF_F_KDF_HKDF_SIZE                              115
@@ -43,6 +48,8 @@ int ERR_load_KDF_strings(void);
 # define KDF_F_KDF_TLS1_PRF_CTRL_STR                      125
 # define KDF_F_KDF_TLS1_PRF_DERIVE                        126
 # define KDF_F_KDF_TLS1_PRF_NEW                           127
+# define KDF_F_KRB5KDF                                    139
+# define KDF_F_KRB5KDF_DERIVE                             140
 # define KDF_F_PBKDF2_SET_MEMBUF                          128
 # define KDF_F_PKEY_HKDF_CTRL_STR                         103
 # define KDF_F_PKEY_HKDF_DERIVE                           102
@@ -56,12 +63,21 @@ int ERR_load_KDF_strings(void);
 # define KDF_F_PKEY_TLS1_PRF_DERIVE                       101
 # define KDF_F_PKEY_TLS1_PRF_INIT                         110
 # define KDF_F_SCRYPT_SET_MEMBUF                          129
+# define KDF_F_SSKDF_DERIVE                               141
+# define KDF_F_SSKDF_NEW                                  142
+# define KDF_F_SSKDF_SIZE                                 143
 # define KDF_F_TLS1_PRF_ALG                               111
 
 /*
  * KDF reason codes.
  */
+# define KDF_R_FAILED_TO_GENERATE_KEY                     118
+# define KDF_R_INVALID_CIPHER                             116
+# define KDF_R_INVALID_CONSTANT_LENGTH                    119
 # define KDF_R_INVALID_DIGEST                             100
+# define KDF_R_INVALID_SEED_LENGTH                        117
+# define KDF_R_MISSING_CIPHER                             120
+# define KDF_R_MISSING_CONSTANT                           121
 # define KDF_R_MISSING_ITERATION_COUNT                    109
 # define KDF_R_MISSING_KEY                                104
 # define KDF_R_MISSING_MESSAGE_DIGEST                     105
@@ -76,6 +92,7 @@ int ERR_load_KDF_strings(void);
 # define KDF_R_UNKNOWN_PARAMETER_TYPE                     103
 # define KDF_R_VALUE_ERROR                                108
 # define KDF_R_VALUE_MISSING                              102
+# define KDF_R_WRONG_FINAL_BLOCK_LENGTH                   122
 # define KDF_R_WRONG_OUTPUT_BUFFER_SIZE                   112
 
 #endif

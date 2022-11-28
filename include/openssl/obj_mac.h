@@ -4974,6 +4974,18 @@
 #define LN_sshkdf               "sshkdf"
 #define NID_sshkdf              1203
 
+#define SN_kbkdf               "KBKDF"
+#define LN_kbkdf               "kbkdf"
+#define NID_kbkdf              1204
+
+#define SN_krb5kdf             "KRB5KDF"
+#define LN_krb5kdf             "krb5kdf"
+#define NID_krb5kdf            1205
+
+#define SN_sskdf                "SSKDF"
+#define LN_sskdf                "sskdf"
+#define NID_sskdf               1206
+
 #define SN_id_pkinit            "id-pkinit"
 #define NID_id_pkinit           1031
 #define OBJ_id_pkinit           1L,3L,6L,1L,5L,2L,3L

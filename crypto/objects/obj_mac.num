@@ -1193,3 +1193,6 @@ magma_mac		1192
 hmacWithSHA512_224		1193
 hmacWithSHA512_256		1194
 sshkdf		1195
+kbkdf		1196
+krb5kdf		1197
+sskdf		1198
