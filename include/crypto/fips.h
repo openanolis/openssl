@@ -50,10 +50,6 @@
 #include <openssl/opensslconf.h>
 #include <openssl/evp.h>
 
-#ifndef OPENSSL_FIPS
-# error FIPS is disabled.
-#endif
-
 #ifdef OPENSSL_FIPS
 
 int FIPS_module_mode_set(int onoff);
@@ -96,5 +92,9 @@ int fips_cipher_test(EVP_CIPHER_CTX *ctx,
 void fips_set_selftest_fail(void);
 
 void FIPS_get_timevec(unsigned char *buf, unsigned long *pctr);
+
+#else
+
+# define fips_in_post() 0
 
 #endif

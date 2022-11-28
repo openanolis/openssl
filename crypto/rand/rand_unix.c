@@ -20,7 +20,7 @@
 #include "crypto/fips.h"
 #include <stdio.h>
 #include "internal/dso.h"
-#ifdef __linux
+#if defined(__linux) && !defined(OPENSSL_SYS_UEFI)
 # include <sys/syscall.h>
 # include <sys/random.h>
 # ifdef DEVRANDOM_WAIT
