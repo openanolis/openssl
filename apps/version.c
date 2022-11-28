@@ -64,7 +64,7 @@ int version_main(int argc, char **argv)
 {
     int ret = 1, dirty = 0, seed = 0;
     int cflags = 0, version = 0, date = 0, options = 0, platform = 0, dir = 0;
-    int engdir = 0;
+    int engdir = 0, engines = 0;
     char *prog;
     OPTION_CHOICE o;
 
@@ -106,7 +106,7 @@ opthelp:
             break;
         case OPT_A:
             seed = options = cflags = version = date = platform = dir = engdir
-                = 1;
+                = engines = 1;
             break;
         }
     }
@@ -186,6 +186,16 @@ opthelp:
 #ifdef OPENSSL_RAND_SEED_OS
         printf(" os-specific");
 #endif
+        printf("\n");
+    }
+    if (engines) {
+        ENGINE *e;
+        printf("engines:  ");
+        e = ENGINE_get_first();
+        while (e) {
+            printf("%s ", ENGINE_get_id(e));
+            e = ENGINE_get_next(e);
+        }
         printf("\n");
     }
     ret = 0;
