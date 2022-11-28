@@ -161,14 +161,14 @@ static const TLS_GROUP_INFO nid_list[] = {
     {NID_secp224k1, 112, TLS_CURVE_PRIME}, /* secp224k1 (20) */
     {NID_secp224r1, 112, TLS_CURVE_PRIME | TLS_CURVE_FIPS}, /* secp224r1 (21) */
     {NID_secp256k1, 128, TLS_CURVE_PRIME}, /* secp256k1 (22) */
-    {NID_X9_62_prime256v1, 128, TLS_CURVE_PRIME | TLS_CURVE_FIPS}, /* secp256r1 (23) */
-    {NID_secp384r1, 192, TLS_CURVE_PRIME | TLS_CURVE_FIPS}, /* secp384r1 (24) */
-    {NID_secp521r1, 256, TLS_CURVE_PRIME | TLS_CURVE_FIPS}, /* secp521r1 (25) */
+    {NID_X9_62_prime256v1, 128, TLS_CURVE_PRIME | TLS_CURVE_FIPS | TLS_CURVE_TLS1_3}, /* secp256r1 (23) */
+    {NID_secp384r1, 192, TLS_CURVE_PRIME | TLS_CURVE_FIPS | TLS_CURVE_TLS1_3}, /* secp384r1 (24) */
+    {NID_secp521r1, 256, TLS_CURVE_PRIME | TLS_CURVE_FIPS | TLS_CURVE_TLS1_3}, /* secp521r1 (25) */
     {NID_brainpoolP256r1, 128, TLS_CURVE_PRIME}, /* brainpoolP256r1 (26) */
     {NID_brainpoolP384r1, 192, TLS_CURVE_PRIME}, /* brainpoolP384r1 (27) */
     {NID_brainpoolP512r1, 256, TLS_CURVE_PRIME}, /* brainpool512r1 (28) */
-    {EVP_PKEY_X25519, 128, TLS_CURVE_CUSTOM}, /* X25519 (29) */
-    {EVP_PKEY_X448, 224, TLS_CURVE_CUSTOM}, /* X448 (30) */
+    {EVP_PKEY_X25519, 128, TLS_CURVE_CUSTOM | TLS_CURVE_TLS1_3}, /* X25519 (29) */
+    {EVP_PKEY_X448, 224, TLS_CURVE_CUSTOM | TLS_CURVE_TLS1_3}, /* X448 (30) */
 };
 
 static const unsigned char ecformats_default[] = {
@@ -259,6 +259,8 @@ int tls_curve_allowed(SSL *s, uint16_t curve, int op)
         return 0;
 # endif
     if (FIPS_mode() && !(cinfo->flags & TLS_CURVE_FIPS))
+        return 0;
+    if (s->version >= TLS1_3_VERSION && !(cinfo->flags & TLS_CURVE_TLS1_3))
         return 0;
     ctmp[0] = curve >> 8;
     ctmp[1] = curve & 0xff;
