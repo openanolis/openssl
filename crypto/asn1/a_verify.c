@@ -7,6 +7,9 @@
  * https://www.openssl.org/source/license.html
  */
 
+/* for secure_getenv */
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>
@@ -130,6 +133,12 @@ int ASN1_item_verify(const ASN1_ITEM *it, X509_ALGOR *a,
         if (ret != 2)
             goto err;
         ret = -1;
+    } else if ((mdnid == NID_md5
+               && secure_getenv("OPENSSL_ENABLE_MD5_VERIFY") == NULL) ||
+               mdnid == NID_md4 || mdnid == NID_md2 || mdnid == NID_sha) {
+        ASN1err(ASN1_F_ASN1_ITEM_VERIFY,
+                ASN1_R_UNKNOWN_MESSAGE_DIGEST_ALGORITHM);
+        goto err;
     } else {
         const EVP_MD *type = EVP_get_digestbynid(mdnid);
 
