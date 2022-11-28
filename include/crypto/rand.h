@@ -24,6 +24,7 @@
 typedef struct rand_pool_st RAND_POOL;
 
 void rand_cleanup_int(void);
+void rand_force_reseed(void);
 void rand_drbg_cleanup_int(void);
 void drbg_delete_thread_state(void);
 

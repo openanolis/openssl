@@ -1005,6 +1005,20 @@ size_t rand_drbg_seedlen(RAND_DRBG *drbg)
     return min_entropy > min_entropylen ? min_entropy : min_entropylen;
 }
 
+void rand_force_reseed(void)
+{
+    RAND_DRBG *drbg;
+
+    drbg = RAND_DRBG_get0_master();
+    drbg->fork_id = 0;
+
+    drbg = RAND_DRBG_get0_private();
+    drbg->fork_id = 0;
+
+    drbg = RAND_DRBG_get0_public();
+    drbg->fork_id = 0;
+}
+
 /* Implements the default OpenSSL RAND_add() method */
 static int drbg_add(const void *buf, int num, double randomness)
 {

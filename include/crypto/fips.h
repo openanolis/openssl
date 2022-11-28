@@ -77,6 +77,8 @@ int FIPS_selftest_hmac(void);
 int FIPS_selftest_drbg(void);
 int FIPS_selftest_cmac(void);
 
+int fips_in_post(void);
+
 int fips_pkey_signature_test(EVP_PKEY *pkey,
                                  const unsigned char *tbs, int tbslen,
                                  const unsigned char *kat,

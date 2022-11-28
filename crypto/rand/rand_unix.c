@@ -17,10 +17,12 @@
 #include <openssl/crypto.h>
 #include "rand_local.h"
 #include "crypto/rand.h"
+#include "crypto/fips.h"
 #include <stdio.h>
 #include "internal/dso.h"
 #ifdef __linux
 # include <sys/syscall.h>
+# include <sys/random.h>
 # ifdef DEVRANDOM_WAIT
 #  include <sys/shm.h>
 #  include <sys/utsname.h>
@@ -344,7 +346,7 @@ static ssize_t sysctl_random(char *buf, size_t buflen)
  * syscall_random(): Try to get random data using a system call
  * returns the number of bytes returned in buf, or < 0 on error.
  */
-static ssize_t syscall_random(void *buf, size_t buflen)
+static ssize_t syscall_random(void *buf, size_t buflen, int nonblock)
 {
     /*
      * Note: 'buflen' equals the size of the buffer which is used by the
@@ -369,6 +371,7 @@ static ssize_t syscall_random(void *buf, size_t buflen)
      * Note: Sometimes getentropy() can be provided but not implemented
      * internally. So we need to check errno for ENOSYS
      */
+#  if 0
 #  if defined(__GNUC__) && __GNUC__>=2 && defined(__ELF__) && !defined(__hpux)
     extern int getentropy(void *buffer, size_t length) __attribute__((weak));
 
@@ -394,10 +397,10 @@ static ssize_t syscall_random(void *buf, size_t buflen)
     if (p_getentropy.p != NULL)
         return p_getentropy.f(buf, buflen) == 0 ? (ssize_t)buflen : -1;
 #  endif
-
+#  endif
     /* Linux supports this since version 3.17 */
-#  if defined(__linux) && defined(__NR_getrandom)
-    return syscall(__NR_getrandom, buf, buflen, 0);
+#  if defined(__linux) && defined(SYS_getrandom)
+    return syscall(SYS_getrandom, buf, buflen, nonblock?GRND_NONBLOCK:0);
 #  elif (defined(__FreeBSD__) || defined(__NetBSD__)) && defined(KERN_ARND)
     return sysctl_random(buf, buflen);
 #  else
@@ -633,6 +636,9 @@ size_t rand_pool_acquire_entropy(RAND_POOL *pool)
     size_t entropy_available;
 
 #   if defined(OPENSSL_RAND_SEED_GETRANDOM)
+    int in_post;
+
+    for (in_post = fips_in_post(); in_post >= 0; --in_post) {
     {
         size_t bytes_needed;
         unsigned char *buffer;
@@ -643,7 +649,7 @@ size_t rand_pool_acquire_entropy(RAND_POOL *pool)
         bytes_needed = rand_pool_bytes_needed(pool, 1 /*entropy_factor*/);
         while (bytes_needed != 0 && attempts-- > 0) {
             buffer = rand_pool_add_begin(pool, bytes_needed);
-            bytes = syscall_random(buffer, bytes_needed);
+            bytes = syscall_random(buffer, bytes_needed, in_post);
             if (bytes > 0) {
                 rand_pool_add_end(pool, bytes, 8 * bytes);
                 bytes_needed -= bytes;
@@ -678,8 +684,10 @@ size_t rand_pool_acquire_entropy(RAND_POOL *pool)
             int attempts = 3;
             const int fd = get_random_device(i);
 
-            if (fd == -1)
+            if (fd == -1) {
+                OPENSSL_showfatal("Random device %s cannot be opened.\n", random_device_paths[i]);
                 continue;
+            }
 
             while (bytes_needed != 0 && attempts-- > 0) {
                 buffer = rand_pool_add_begin(pool, bytes_needed);
@@ -742,7 +750,9 @@ size_t rand_pool_acquire_entropy(RAND_POOL *pool)
             return entropy_available;
     }
 #   endif
-
+#   ifdef OPENSSL_RAND_SEED_GETRANDOM
+    }
+#   endif
     return rand_pool_entropy_available(pool);
 #  endif
 }

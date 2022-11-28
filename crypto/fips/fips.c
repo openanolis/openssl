@@ -68,6 +68,7 @@
 
 # include <openssl/fips.h>
 # include "internal/thread_once.h"
+# include "crypto/rand.h"
 
 # ifndef PATH_MAX
 #  define PATH_MAX 1024
@@ -76,6 +77,7 @@
 static int fips_selftest_fail = 0;
 static int fips_mode = 0;
 static int fips_started = 0;
+static int fips_post = 0;
 
 static int fips_is_owning_thread(void);
 static int fips_set_owning_thread(void);
@@ -156,6 +158,11 @@ void FIPS_selftest_check(void)
 void fips_set_selftest_fail(void)
 {
     fips_selftest_fail = 1;
+}
+
+int fips_in_post(void)
+{
+    return fips_post;
 }
 
 /* we implement what libfipscheck does ourselves */
@@ -445,6 +452,8 @@ int FIPS_module_mode_set(int onoff)
         }
 # endif
 
+        fips_post = 1;
+
         if (!FIPS_selftest()) {
             fips_selftest_fail = 1;
             ret = 0;
@@ -459,7 +468,12 @@ int FIPS_module_mode_set(int onoff)
             goto end;
         }
 
+        fips_post = 0;
+
         fips_set_mode(onoff);
+        /* force RNG reseed with entropy from getrandom() on next call */
+        rand_force_reseed();
+
         ret = 1;
         goto end;
     }
