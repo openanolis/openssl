@@ -169,7 +169,7 @@ const OPTIONS ca_options[] = {
     {"enddate", OPT_ENDDATE, 's',
      "YYMMDDHHMMSSZ cert notAfter (overrides -days)"},
     {"days", OPT_DAYS, 'p', "Number of days to certify the cert for"},
-    {"md", OPT_MD, 's', "md to use; one of md2, md5, sha or sha1"},
+    {"md", OPT_MD, 's', "md to use; see openssl help for list"},
     {"policy", OPT_POLICY, 's', "The CA 'policy' to support"},
     {"keyfile", OPT_KEYFILE, 's', "Private key"},
     {"keyform", OPT_KEYFORM, 'f', "Private key file format (PEM or ENGINE)"},
