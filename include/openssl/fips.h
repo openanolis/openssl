@@ -122,9 +122,16 @@ extern "C" {
 # define FIPS_F_FIPS_SELFTEST_DES                         111
 # define FIPS_F_FIPS_SELFTEST_DSA                         112
 # define FIPS_F_FIPS_SELFTEST_ECDSA                       133
+# define FIPS_F_FIPS_SELFTEST_HKDF                        153
 # define FIPS_F_FIPS_SELFTEST_HMAC                        113
+# define FIPS_F_FIPS_SELFTEST_KBKDF                       151
+# define FIPS_F_FIPS_SELFTEST_KRB5KDF                     154
+# define FIPS_F_FIPS_SELFTEST_PBKDF2                      152
 # define FIPS_F_FIPS_SELFTEST_SHA1                        115
 # define FIPS_F_FIPS_SELFTEST_SHA2                        105
+# define FIPS_F_FIPS_SELFTEST_SSHKDF                      155
+# define FIPS_F_FIPS_SELFTEST_SSKDF                       156
+# define FIPS_F_FIPS_SELFTEST_TLS1_PRF                    157
 # define FIPS_F_OSSL_ECDSA_SIGN_SIG                       143
 # define FIPS_F_OSSL_ECDSA_VERIFY_SIG                     148
 # define FIPS_F_RSA_BUILTIN_KEYGEN                        116

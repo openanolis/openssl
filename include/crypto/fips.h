@@ -72,6 +72,7 @@ void FIPS_drbg_stick(int onoff);
 int FIPS_selftest_hmac(void);
 int FIPS_selftest_drbg(void);
 int FIPS_selftest_cmac(void);
+int FIPS_selftest_kdf(void);
 
 int fips_in_post(void);
 
