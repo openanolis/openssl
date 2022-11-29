@@ -1174,6 +1174,11 @@
 #define NID_sm3         1143
 #define OBJ_sm3         OBJ_sm_scheme,401L
 
+#define SN_SM2_with_SM3         "SM2-SM3"
+#define LN_SM2_with_SM3         "SM2-with-SM3"
+#define NID_SM2_with_SM3                1205
+#define OBJ_SM2_with_SM3                OBJ_sm_scheme,501L
+
 #define SN_sm3WithRSAEncryption         "RSA-SM3"
 #define LN_sm3WithRSAEncryption         "sm3WithRSAEncryption"
 #define NID_sm3WithRSAEncryption                1144
