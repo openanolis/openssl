@@ -4972,19 +4972,19 @@
 
 #define SN_sshkdf               "SSHKDF"
 #define LN_sshkdf               "sshkdf"
-#define NID_sshkdf              1203
+#define NID_sshkdf              1195
 
-#define SN_kbkdf               "KBKDF"
-#define LN_kbkdf               "kbkdf"
-#define NID_kbkdf              1204
+#define SN_kbkdf                "KBKDF"
+#define LN_kbkdf                "kbkdf"
+#define NID_kbkdf               1196
 
-#define SN_krb5kdf             "KRB5KDF"
-#define LN_krb5kdf             "krb5kdf"
-#define NID_krb5kdf            1205
+#define SN_krb5kdf              "KRB5KDF"
+#define LN_krb5kdf              "krb5kdf"
+#define NID_krb5kdf             1197
 
 #define SN_sskdf                "SSKDF"
 #define LN_sskdf                "sskdf"
-#define NID_sskdf               1206
+#define NID_sskdf               1198
 
 #define SN_id_pkinit            "id-pkinit"
 #define NID_id_pkinit           1031
