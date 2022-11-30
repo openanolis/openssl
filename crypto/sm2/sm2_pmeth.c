@@ -220,6 +220,10 @@ static int pkey_sm2_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
         *(size_t *)p2 = smctx->id_len;
         return 1;
 
+    case EVP_PKEY_CTRL_PEER_KEY:
+    case EVP_PKEY_CTRL_PKCS7_SIGN:
+    case EVP_PKEY_CTRL_CMS_SIGN:
+        /* Default behaviour is OK */
     case EVP_PKEY_CTRL_DIGESTINIT:
         /* nothing to be inited, this is to suppress the error... */
         return 1;
@@ -258,14 +262,12 @@ static int pkey_sm2_ctrl_str(EVP_PKEY_CTX *ctx,
         OPENSSL_free(smctx->id);
 
         if (value) {
-            long len;
-
-            smctx->id = OPENSSL_hexstr2buf(value, &len);
+            smctx->id = (uint8_t *)OPENSSL_strdup(value);
             if (smctx->id == NULL) {
-                SM2err(SM2_F_PKEY_SM2_CTRL_STR, SM2_R_ID_NOT_SET);
-                return -2;
+                SM2err(SM2_F_PKEY_SM2_CTRL_STR, ERR_R_MALLOC_FAILURE);
+                return 0;
             }
-            smctx->id_len = (size_t)len;
+            smctx->id_len = OPENSSL_strnlen(value, SIZE_MAX);
         } else {
             /* set null-ID */
             smctx->id = NULL;
@@ -288,12 +290,22 @@ static int pkey_sm2_digest_custom(EVP_PKEY_CTX *ctx, EVP_MD_CTX *mctx)
 
     if (!smctx->id_set) {
         /*
-         * An ID value must be set. The specifications are not clear whether a
-         * NULL is allowed. We only allow it if set explicitly for maximum
-         * flexibility.
+         * Actually, there is no standard doc which illustrate how to set sm2-id
+         * correctly, only GM/T 0009-2012 gives a fuzzy definition that sm2-id
+         * would be "1234567812345678", and there is no way to get sm2-id from
+         * certificate. In tls handshake, client/server would get a long
+         * certificate chain from peer, we can't find any effective way to
+         * recognize or set sm2-id for each cert, so we choose to set a default
+         * sm2 id for each sm2 sign process.
          */
-        SM2err(SM2_F_PKEY_SM2_DIGEST_CUSTOM, SM2_R_ID_NOT_SET);
-        return 0;
+        smctx->id = (uint8_t *)OPENSSL_memdup(SM2_DEFAULT_USERID,
+                                              SM2_DEFAULT_USERID_LEN);
+        if (smctx->id == NULL) {
+            SM2err(SM2_F_PKEY_SM2_DIGEST_CUSTOM, ERR_R_MALLOC_FAILURE);
+            return 0;
+        }
+        smctx->id_len = SM2_DEFAULT_USERID_LEN;
+        smctx->id_set = 1;
     }
 
     if (mdlen < 0) {

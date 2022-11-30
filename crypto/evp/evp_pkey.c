@@ -49,6 +49,17 @@ EVP_PKEY *EVP_PKCS82PKEY(const PKCS8_PRIV_KEY_INFO *p8)
         goto error;
     }
 
+#ifndef OPENSSL_NO_SM2
+    if (EVP_PKEY_id(pkey) == EVP_PKEY_EC) {
+        EC_KEY *eckey = EVP_PKEY_get0_EC_KEY(pkey);
+        if (eckey) {
+            const EC_GROUP *group = EC_KEY_get0_group(eckey);
+            if (group && EC_GROUP_get_curve_name(group) == NID_sm2)
+                EVP_PKEY_set_alias_type(pkey, EVP_PKEY_SM2);
+        }
+    }
+#endif
+
     return pkey;
 
  error:

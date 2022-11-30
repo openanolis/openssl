@@ -234,6 +234,7 @@ static int check(X509_STORE *ctx, const char *file,
         X509_STORE_CTX_set0_trusted_stack(csc, tchain);
     if (crls != NULL)
         X509_STORE_CTX_set0_crls(csc, crls);
+    /* SM2: TODO */
     i = X509_verify_cert(csc);
     if (i > 0 && X509_STORE_CTX_get_error(csc) == X509_V_OK) {
         printf("%s: OK\n", (file == NULL) ? "stdin" : file);

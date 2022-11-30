@@ -208,6 +208,7 @@ int crl_main(int argc, char **argv)
             BIO_printf(bio_err, "Error getting CRL issuer public key\n");
             goto end;
         }
+        /* SM2: TODO */
         i = X509_CRL_verify(x, pkey);
         EVP_PKEY_free(pkey);
         if (i < 0)

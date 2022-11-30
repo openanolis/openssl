@@ -28,6 +28,9 @@ int i2d_PublicKey(EVP_PKEY *a, unsigned char **pp)
         return i2d_DSAPublicKey(EVP_PKEY_get0_DSA(a), pp);
 #endif
 #ifndef OPENSSL_NO_EC
+# ifndef OPENSSL_NO_SM2
+    case EVP_PKEY_SM2:
+# endif
     case EVP_PKEY_EC:
         return i2o_ECPublicKey(EVP_PKEY_get0_EC_KEY(a), pp);
 #endif

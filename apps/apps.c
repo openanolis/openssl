@@ -783,10 +783,12 @@ EVP_PKEY *load_key(const char *file, int format, int maybe_stdin,
     }
 #ifndef OPENSSL_NO_SM2
     else if (EVP_PKEY_id(pkey) == EVP_PKEY_EC) {
-        EC_KEY *ec = EVP_PKEY_get0_EC_KEY(pkey);
-        int curve = EC_GROUP_get_curve_name(EC_KEY_get0_group(ec));
-        if (curve == NID_sm2)
-            EVP_PKEY_set_alias_type(pkey, EVP_PKEY_SM2);
+        EC_KEY *eckey = EVP_PKEY_get0_EC_KEY(pkey);
+        if (eckey) {
+            const EC_GROUP *group = EC_KEY_get0_group(eckey);
+            if (group && EC_GROUP_get_curve_name(group) == NID_sm2)
+                EVP_PKEY_set_alias_type(pkey, EVP_PKEY_SM2);
+        }
     }
 #endif
     return pkey;
@@ -875,6 +877,16 @@ EVP_PKEY *load_pubkey(const char *file, int format, int maybe_stdin,
     BIO_free(key);
     if (pkey == NULL)
         BIO_printf(bio_err, "unable to load %s\n", key_descrip);
+#ifndef OPENSSL_NO_SM2
+    else if (EVP_PKEY_id(pkey) == EVP_PKEY_EC) {
+        EC_KEY *eckey = EVP_PKEY_get0_EC_KEY(pkey);
+        if (eckey) {
+            const EC_GROUP *group = EC_KEY_get0_group(eckey);
+            if (group && EC_GROUP_get_curve_name(group) == NID_sm2)
+                EVP_PKEY_set_alias_type(pkey, EVP_PKEY_SM2);
+        }
+    }
+#endif
     return pkey;
 }
 

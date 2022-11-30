@@ -130,6 +130,17 @@ static int x509_pubkey_decode(EVP_PKEY **ppkey, X509_PUBKEY *key)
         goto error;
     }
 
+#ifndef OPENSSL_NO_SM2
+    if (EVP_PKEY_id(pkey) == EVP_PKEY_EC) {
+        EC_KEY *eckey = EVP_PKEY_get0_EC_KEY(pkey);
+        if (eckey) {
+            const EC_GROUP *group = EC_KEY_get0_group(eckey);
+            if (group && EC_GROUP_get_curve_name(group) == NID_sm2)
+                EVP_PKEY_set_alias_type(pkey, EVP_PKEY_SM2);
+        }
+    }
+#endif
+
     *ppkey = pkey;
     return 1;
 
@@ -145,17 +156,8 @@ EVP_PKEY *X509_PUBKEY_get0(X509_PUBKEY *key)
     if (key == NULL || key->public_key == NULL)
         return NULL;
 
-    if (key->pkey != NULL) {
-#ifndef OPENSSL_NO_SM2
-        if (EVP_PKEY_id(key->pkey) == EVP_PKEY_EC) {
-            EC_KEY *ec = EVP_PKEY_get0_EC_KEY(key->pkey);
-            int curve = EC_GROUP_get_curve_name(EC_KEY_get0_group(ec));
-            if (curve == NID_sm2)
-                EVP_PKEY_set_alias_type(key->pkey, EVP_PKEY_SM2);
-        }
-#endif
+    if (key->pkey != NULL)
         return key->pkey;
-    }
 
     /*
      * When the key ASN.1 is initially parsed an attempt is made to

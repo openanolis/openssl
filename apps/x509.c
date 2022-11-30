@@ -807,6 +807,7 @@ int x509_main(int argc, char **argv)
                         goto end;
                 }
 
+                /* SM2: TODO */
                 if (!sign(x, Upkey, days, clrext, digest, extconf, extsect, preserve_dates))
                     goto end;
             } else if (CA_flag == i) {

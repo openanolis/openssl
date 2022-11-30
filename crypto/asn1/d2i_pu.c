@@ -56,6 +56,9 @@ EVP_PKEY *d2i_PublicKey(int type, EVP_PKEY **a, const unsigned char **pp,
         break;
 #endif
 #ifndef OPENSSL_NO_EC
+# ifndef OPENSSL_NO_SM2
+    case EVP_PKEY_SM2:
+# endif
     case EVP_PKEY_EC:
         if (!o2i_ECPublicKey(&ret->pkey.ec, pp, length)) {
             ASN1err(ASN1_F_D2I_PUBLICKEY, ERR_R_ASN1_LIB);
